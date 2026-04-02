@@ -724,7 +724,42 @@ main{padding:16px;padding-bottom:80px;max-width:700px;margin:0 auto}
 
 <div class="toast" id="toast"></div>
 
-<script>
+
+// Conexion con FIREBASE   ═══════════════════════════════════════════════════════════════
+  
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBXLFu17P1qUzKe8nM5SQysZ1EhXbX1q08",
+  authDomain: "k-accc6.firebaseapp.com",
+  projectId: "k-accc6",
+  storageBucket: "k-accc6.firebasestorage.app",
+  messagingSenderId: "406582071543",
+  appId: "1:406582071543:web:1aa381dfe02170e05443f2"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.storage = {
+  async set(key, value) {
+    await setDoc(doc(db, "ultra105k_profiles", key), {
+      value,
+      updatedAt: Date.now()
+    });
+    return true;
+  },
+
+  async get(key) {
+    const snap = await getDoc(doc(db, "ultra105k_profiles", key));
+    if (!snap.exists()) return null;
+    return snap.data();
+  }
+};
+
+  
 // ═══════════════════════════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════════════════════════
@@ -776,6 +811,8 @@ const NUTRICION_DATA = [
   {bloque:'10h+ (Final)',km:'100–105 km',cho:'20–40',sodio:'300–500',hidra:'200–400',fuente:'Caldo + glucosa directa si hay hipoglucemia. Cola/Coca-Cola',senal:'Cada 15 min',alerta:'Orina oscura = deshidratado → aumentar líquido',alertaClass:'warn'},
 ];
 
+
+  
 // ═══════════════════════════════════════════════════════════════
 // STATE — local + cloud sync
 // ═══════════════════════════════════════════════════════════════
