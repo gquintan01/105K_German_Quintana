@@ -799,7 +799,7 @@ function loadLocalState(){
 }
 
 function saveLocalState(){
-  try { localStorage.setItem('ultra105k_'+STORAGE_VERSION, JSON.stringify(state)); } catch(e){}
+  try { localStorage.setItem('ultra105k_'+STORAGE_VERSION, JSON.stringify(state)); } catch(e){ console.error('pullFromCloud error:', e); }
 }
 
 async function pushToCloud(){
@@ -837,7 +837,7 @@ async function pullFromCloud(profileKey){
         return true;
       }
     }
-  } catch(e){}
+  } catch(e){ console.error('pullFromCloud error:', e); }
   return false;
 }
 
