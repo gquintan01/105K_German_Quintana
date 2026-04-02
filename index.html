@@ -722,6 +722,37 @@ main{padding:16px;padding-bottom:80px;max-width:700px;margin:0 auto}
 
 <div class="toast" id="toast"></div>
 
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBXLFu17P1qUzKe8nM5SQysZ1EhXbX1q08",
+  authDomain: "k-accc6.firebaseapp.com",
+  projectId: "k-accc6",
+  storageBucket: "k-accc6.firebasestorage.app",
+  messagingSenderId: "406582071543",
+  appId: "1:406582071543:web:1aa381dfe02170e05443f2"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+window.storage = {
+  async set(key, value) {
+    await db.collection("ultra105k_profiles").doc(key).set({
+      value,
+      updatedAt: Date.now()
+    });
+    return true;
+  },
+
+  async get(key) {
+    const snap = await db.collection("ultra105k_profiles").doc(key).get();
+    if (!snap.exists) return null;
+    return snap.data();
+  }
+};
+</script>
 <script>
 // ═══════════════════════════════════════════════════════════════
 // DATA
@@ -799,7 +830,7 @@ function loadLocalState(){
 }
 
 function saveLocalState(){
-  try { localStorage.setItem('ultra105k_'+STORAGE_VERSION, JSON.stringify(state)); } catch(e){}
+  try { localStorage.setItem('ultra105k_'+STORAGE_VERSION, JSON.stringify(state)); } catch(e){ console.error('pullFromCloud error:', e); }
 }
 
 async function pushToCloud(){
@@ -840,7 +871,7 @@ async function pullFromCloud(profileKey){
         return true;
       }
     }
-  } catch(e){}
+  } catch(e){ console.error('pullFromCloud error:', e); }
   return false;
 }
 
