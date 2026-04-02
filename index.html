@@ -1533,7 +1533,52 @@ async function init(){
     setSyncStatus('connected','✓ Sincronizado');
   }
 }
+function applyStartDate() {
+    const input = document.querySelector('input[type="date"]');
 
+    if (!input) {
+        alert("No se encontró el campo de fecha");
+        return;
+    }
+
+    const newDate = input.value;
+
+    if (!newDate) {
+        alert("Selecciona una fecha primero");
+        return;
+    }
+
+    state.startDate = newDate;
+
+    if (cloudProfileKey) {
+        window.storage.set(cloudProfileKey, state);
+    }
+
+    updateStartDateInfo();
+    renderAll();
+
+    alert("Fecha actualizada correctamente");
+}
+window.showView = showView;
+window.toggleWeek = toggleWeek;
+window.toggleCard = toggleCard;
+window.toggleDone = toggleDone;
+window.setRpe = setRpe;
+window.setDur = setDur;
+window.quickSave = quickSave;
+window.toggleFuerzaPhase = toggleFuerzaPhase;
+window.changeLogWeek = changeLogWeek;
+window.selectLogRpe = selectLogRpe;
+window.saveLog = saveLog;
+window.openSession = openSession;
+window.closeModal = closeModal;
+window.forcePush = forcePush;
+window.forcePull = forcePull;
+window.createNewProfile = createNewProfile;
+window.loadProfile = loadProfile;
+window.disconnectProfile = disconnectProfile;
+window.copyCode = copyCode;
+window.applyStartDate = applyStartDate;
 init();
 </script>
 </body>
