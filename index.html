@@ -722,38 +722,7 @@ main{padding:16px;padding-bottom:80px;max-width:700px;margin:0 auto}
 
 <div class="toast" id="toast"></div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBXLFu17P1qUzKe8nM5SQysZ1EhXbX1q08",
-  authDomain: "k-accc6.firebaseapp.com",
-  projectId: "k-accc6",
-  storageBucket: "k-accc6.firebasestorage.app",
-  messagingSenderId: "406582071543",
-  appId: "1:406582071543:web:1aa381dfe02170e05443f2"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-window.storage = {
-  async set(key, value) {
-    await setDoc(doc(db, "ultra105k_profiles", key), {
-      value,
-      updatedAt: Date.now()
-    });
-    return true;
-  },
-
-  async get(key) {
-    const snap = await getDoc(doc(db, "ultra105k_profiles", key));
-    if (!snap.exists()) return null;
-    return snap.data();
-  }
-};
-
+<script>
 // ═══════════════════════════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════════════════════════
@@ -1526,6 +1495,29 @@ async function init(){
     setSyncStatus('connected','✓ Sincronizado');
   }
 }
+
+
+// Exponer funciones al ámbito global para que funcionen los onclick del HTML
+window.showView = showView;
+window.toggleWeek = toggleWeek;
+window.toggleCard = toggleCard;
+window.toggleDone = toggleDone;
+window.setRpe = setRpe;
+window.setDur = setDur;
+window.quickSave = quickSave;
+window.toggleFuerzaPhase = toggleFuerzaPhase;
+window.changeLogWeek = changeLogWeek;
+window.selectLogRpe = selectLogRpe;
+window.saveLog = saveLog;
+window.openSession = openSession;
+window.closeModal = closeModal;
+window.forcePush = forcePush;
+window.forcePull = forcePull;
+window.createNewProfile = createNewProfile;
+window.loadProfile = loadProfile;
+window.disconnectProfile = disconnectProfile;
+window.copyCode = copyCode;
+window.applyStartDate = applyStartDate;
 
 init();
 </script>
