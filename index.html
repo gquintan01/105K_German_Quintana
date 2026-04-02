@@ -472,9 +472,7 @@ main{padding:16px;padding-bottom:80px;max-width:700px;margin:0 auto}
 
 <!-- TOP BAR -->
 <div id="topbar">
-
-  
-  <div class="logo">105k <span>GERMAN QUINTANA </span></div>
+  <div class="logo">RETO DEL INDIO<span> 105k  GERMAN QUINTANA </span></div>
   <div class="race-badge" id="daysLeft">— días</div>
 </div>
 
@@ -724,8 +722,6 @@ main{padding:16px;padding-bottom:80px;max-width:700px;margin:0 auto}
 
 <div class="toast" id="toast"></div>
 
-
-  
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
@@ -758,7 +754,6 @@ window.storage = {
   }
 };
 
-  
 // ═══════════════════════════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════════════════════════
@@ -810,8 +805,6 @@ const NUTRICION_DATA = [
   {bloque:'10h+ (Final)',km:'100–105 km',cho:'20–40',sodio:'300–500',hidra:'200–400',fuente:'Caldo + glucosa directa si hay hipoglucemia. Cola/Coca-Cola',senal:'Cada 15 min',alerta:'Orina oscura = deshidratado → aumentar líquido',alertaClass:'warn'},
 ];
 
-
-  
 // ═══════════════════════════════════════════════════════════════
 // STATE — local + cloud sync
 // ═══════════════════════════════════════════════════════════════
@@ -1533,52 +1526,7 @@ async function init(){
     setSyncStatus('connected','✓ Sincronizado');
   }
 }
-function applyStartDate() {
-    const input = document.querySelector('input[type="date"]');
 
-    if (!input) {
-        alert("No se encontró el campo de fecha");
-        return;
-    }
-
-    const newDate = input.value;
-
-    if (!newDate) {
-        alert("Selecciona una fecha primero");
-        return;
-    }
-
-    state.startDate = newDate;
-
-    if (cloudProfileKey) {
-        window.storage.set(cloudProfileKey, state);
-    }
-
-    updateStartDateInfo();
-    renderAll();
-
-    alert("Fecha actualizada correctamente");
-}
-window.showView = showView;
-window.toggleWeek = toggleWeek;
-window.toggleCard = toggleCard;
-window.toggleDone = toggleDone;
-window.setRpe = setRpe;
-window.setDur = setDur;
-window.quickSave = quickSave;
-window.toggleFuerzaPhase = toggleFuerzaPhase;
-window.changeLogWeek = changeLogWeek;
-window.selectLogRpe = selectLogRpe;
-window.saveLog = saveLog;
-window.openSession = openSession;
-window.closeModal = closeModal;
-window.forcePush = forcePush;
-window.forcePull = forcePull;
-window.createNewProfile = createNewProfile;
-window.loadProfile = loadProfile;
-window.disconnectProfile = disconnectProfile;
-window.copyCode = copyCode;
-window.applyStartDate = applyStartDate;
 init();
 </script>
 </body>
