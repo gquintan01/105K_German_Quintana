@@ -472,7 +472,7 @@ main{padding:16px;padding-bottom:80px;max-width:700px;margin:0 auto}
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <div class="logo">105k<span> GERMAN QUINTANA </span></div>
+  <div class="logo">RETO DEL INDIO<span> 105k  GERMAN QUINTANA </span></div>
   <div class="race-badge" id="daysLeft">— días</div>
 </div>
 
@@ -799,7 +799,7 @@ function loadLocalState(){
 }
 
 function saveLocalState(){
-  try { localStorage.setItem('ultra105k_'+STORAGE_VERSION, JSON.stringify(state)); } catch(e){ console.error('pullFromCloud error:', e); }
+  try { localStorage.setItem('ultra105k_'+STORAGE_VERSION, JSON.stringify(state)); } catch(e){}
 }
 
 async function pushToCloud(){
@@ -811,7 +811,10 @@ async function pushToCloud(){
     const result = await window.storage.set(cloudProfileKey, payload, true);
     if(result) setSyncStatus('connected','✓ Guardado · '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}));
     else setSyncStatus('error','Error al guardar');
-  } catch(e){ setSyncStatus('error','Sin conexión'); }
+  } catch(e){
+    console.error('pushToCloud error:', e);
+    setSyncStatus('error','Sin conexión');
+  }
   isSyncing = false;
   if(pendingSync){ pendingSync=false; pushToCloud(); }
 }
@@ -825,8 +828,8 @@ async function pullFromCloud(profileKey){
       const localTs = state._ts || 0;
       const remoteTs = remote._ts || 1;
       if(remoteTs >= localTs || !state._ts){
-        const {_ts,...cleanRemote} = remote;
-        state = {...state, ...cleanRemote};
+        const { _ts, ...cleanRemote } = remote;
+        state = { ...state, ...cleanRemote };
         if(!state.logs) state.logs={};
         if(!state.fatigue) state.fatigue={};
         if(!state.rpe) state.rpe={};
@@ -837,12 +840,13 @@ async function pullFromCloud(profileKey){
         return true;
       }
     }
-  } catch(e){ console.error('pullFromCloud error:', e); }
+  } catch(e){}
   return false;
 }
 
 let saveTimer = null;
 function saveState(){
+  state._ts = Date.now();
   saveLocalState();
   clearTimeout(saveTimer);
   if(cloudProfileKey){
@@ -1234,7 +1238,7 @@ function renderPlan(){
               </div>
               <div class="dur-input-row">
                 <label>Dur. real</label>
-                <input class="dur-input" type="number" value="${dur}" placeholder="${s.duracion}" min="0" max="400" onchange="event.stopPropagation();setDur('${key}',this.value)" onclick="event.stopPropagation()">
+                <input class="dur-input" type="number" value="${dur}" placeholder="${s.duracion}" min="0" max="400" oninput="event.stopPropagation();setDur('${key}',this.value)" onblur="event.stopPropagation();setDur('${key}',this.value)" onclick="event.stopPropagation()">
                 <button class="save-btn" onclick="event.stopPropagation();quickSave('${key}')">💾 Guardar</button>
               </div>
             </div>
@@ -1281,9 +1285,12 @@ function setDur(key,val){
   saveState();
 }
 
-function quickSave(key){
+async function quickSave(key){
   if(!state.logs[key]) state.logs[key]={ts:Date.now()};
   saveState();
+  if(cloudProfileKey){
+    await pushToCloud();
+  }
   renderPlan();
   renderDashboard();
   showToast('💾 Guardado y sincronizado');
@@ -1495,29 +1502,6 @@ async function init(){
     setSyncStatus('connected','✓ Sincronizado');
   }
 }
-
-
-// Exponer funciones al ámbito global para que funcionen los onclick del HTML
-window.showView = showView;
-window.toggleWeek = toggleWeek;
-window.toggleCard = toggleCard;
-window.toggleDone = toggleDone;
-window.setRpe = setRpe;
-window.setDur = setDur;
-window.quickSave = quickSave;
-window.toggleFuerzaPhase = toggleFuerzaPhase;
-window.changeLogWeek = changeLogWeek;
-window.selectLogRpe = selectLogRpe;
-window.saveLog = saveLog;
-window.openSession = openSession;
-window.closeModal = closeModal;
-window.forcePush = forcePush;
-window.forcePull = forcePull;
-window.createNewProfile = createNewProfile;
-window.loadProfile = loadProfile;
-window.disconnectProfile = disconnectProfile;
-window.copyCode = copyCode;
-window.applyStartDate = applyStartDate;
 
 init();
 </script>
