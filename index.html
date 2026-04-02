@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>El Reto del Indio 105K — Plan de Entrenamiento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* ── El Reto del Indio Palette ── */
+  --ink:   #1a4a35;   /* forest green deep — chrome, headers */
+  --ink2:  #2d6b52;   /* forest green mid — secondary chrome */
+  --ink3:  #3d8a6e;   /* teal — tertiary text, borders */
+  --paper: #f0faf7;   /* seafoam white — page bg */
+  --paper2: #d4ede6;  /* light mint — card borders, input bg */
+  --accent: #2d6b52;  /* forest green — primary CTA */
+  --accent2: #3d8a6e; /* teal — secondary CTA */
+  --gold:  #d4903a;   /* warm amber — badge, warnings, RPE */
+
+  /* Phase colours — kept distinct but in teal family */
+  --f1: #2d6b52; --f1bg: #d4ede6; --f1light: #edf7f3;
+  --f2: #1e6e7a; --f2bg: #c8e8ed; --f2light: #e8f6f8;
+  --f3: #5a7a2d; --f3bg: #ddedc8; --f3light: #f2f8e8;
+  --f4: #7a4a2d; --f4bg: #edddd4; --f4light: #f8f0eb;
+
+  /* Heart rate zones */
+  --z1: #2d7a5e; --z1bg: #d4ede6;
+  --z2: #1e6e7a; --z2bg: #c8e8ed;
+  --z3: #c07830; --z3bg: #f5e8d4;
+
+  --fza: #4a6a2d; --fzabg: #dde8c8;
+  --rec: #6a8a7a; --recbg: #e8f0ec;
+  --green: #2d9a6a; --yellow: #d4b030; --red: #c04040;
+  --shadow: 0 2px 12px rgba(26,74,53,.10);
+  --shadow-lg: 0 8px 32px rgba(26,74,53,.15);
+  --r: 12px; --r-sm: 8px;
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-body: 'Barlow', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--paper);color:var(--ink);min-height:100vh;overscroll-behavior:none}
+
+/* ─── TOP BAR ─────────────────────────────────────────────── */
+#topbar{
+  position:sticky;top:0;z-index:100;
+  background:linear-gradient(135deg,#1a4a35 0%,#2d6b52 100%);
+  display:flex;align-items:center;gap:8px;padding:0 16px;height:56px;
+  border-bottom:3px solid #5aab8a;
+  box-shadow:0 2px 12px rgba(26,74,53,.3);
+}
+#topbar .logo{font-family:var(--font-display);font-weight:900;font-size:19px;color:#fff;letter-spacing:.5px;flex:1;text-shadow:0 1px 3px rgba(0,0,0,.2)}
+#topbar .logo span{color:#a8d8c8}
+#topbar .race-badge{
+  font-family:var(--font-display);font-size:12px;font-weight:700;
+  background:var(--gold);color:#fff;padding:5px 12px;border-radius:20px;
+  white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.2);
+}
+
+/* ─── BOTTOM NAV ──────────────────────────────────────────── */
+#bottomnav{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:linear-gradient(180deg,#1e5540 0%,#1a4a35 100%);
+  border-top:2px solid #3d8a6e;
+  display:flex;
+  box-shadow:0 -2px 12px rgba(26,74,53,.3);
+}
+#bottomnav button{
+  flex:1;background:none;border:none;color:#7ab5a0;padding:10px 4px 12px;
+  font-family:var(--font-body);font-size:10px;font-weight:500;
+  display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;
+  transition:color .2s;
+}
+#bottomnav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2}
+#bottomnav button.active{color:#a8d8c8}
+#bottomnav button.active svg path, #bottomnav button.active svg circle,
+#bottomnav button.active svg rect, #bottomnav button.active svg line,
+#bottomnav button.active svg polyline, #bottomnav button.active svg polygon{
+  stroke:#a8d8c8
+}
+
+/* ─── MAIN CONTENT ────────────────────────────────────────── */
+main{padding:16px;padding-bottom:80px;max-width:700px;margin:0 auto}
+
+/* ─── VIEWS ──────────────────────────────────────────────── */
+.view{display:none}
+.view.active{display:block}
+
+/* ─── DASHBOARD ──────────────────────────────────────────── */
+.hero{
+  background:linear-gradient(135deg,#1a4a35 0%,#2d6b52 60%,#3d8a6e 100%);
+  border-radius:var(--r);padding:20px;margin-bottom:16px;
+  border:1px solid #3d8a6e;position:relative;overflow:hidden;
+  box-shadow:0 4px 20px rgba(26,74,53,.25);
+}
+.hero::before{
+  content:'🌊';position:absolute;right:14px;top:10px;font-size:56px;opacity:.12;
+}
+.hero .phase-badge{
+  font-family:var(--font-display);font-size:12px;font-weight:700;
+  background:#a8d8c8;color:#1a4a35;padding:3px 10px;border-radius:20px;
+  display:inline-block;margin-bottom:10px;letter-spacing:.5px;font-size:11px;
+}
+.hero h1{font-family:var(--font-display);font-size:24px;font-weight:900;color:#fff;line-height:1.1;margin-bottom:4px}
+.hero .sub{font-size:12px;color:#a8d8c8;margin-bottom:16px;opacity:.9}
+.hero .progress-row{display:flex;align-items:center;gap:10px}
+.hero .progress-bar{flex:1;height:8px;background:rgba(255,255,255,.15);border-radius:4px;overflow:hidden}
+.hero .progress-fill{height:100%;background:linear-gradient(90deg,#a8d8c8,#5aab8a);border-radius:4px;transition:width .6s ease}
+.hero .progress-label{font-family:var(--font-display);font-size:14px;font-weight:700;color:#f0c060;white-space:nowrap}
+
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.kpi-card{background:#fff;border-radius:var(--r);padding:14px;box-shadow:0 2px 12px rgba(26,74,53,.08);border:1px solid #d4ede6;border-top:3px solid #3d8a6e}
+.kpi-card .kpi-label{font-size:11px;font-weight:600;color:var(--rec);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.kpi-card .kpi-value{font-family:var(--font-display);font-size:26px;font-weight:900;color:#1a4a35;line-height:1}
+.kpi-card .kpi-unit{font-size:11px;color:var(--rec);margin-top:2px}
+
+.section-title{
+  font-family:var(--font-display);font-size:18px;font-weight:700;
+  color:var(--ink);margin-bottom:10px;margin-top:20px;
+  display:flex;align-items:center;gap:8px;
+}
+.section-title::after{content:'';flex:1;height:2px;background:linear-gradient(90deg,#5aab8a22,transparent)}
+
+/* Today card */
+.today-card{
+  background:#fff;border-radius:var(--r);padding:16px;
+  box-shadow:0 2px 12px rgba(26,74,53,.08);border-left:4px solid #3d8a6e;
+  margin-bottom:10px;cursor:pointer;
+}
+.today-card.done{border-left-color:var(--green);opacity:.75}
+.today-card .tc-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.today-card .tc-badge{
+  font-family:var(--font-display);font-size:11px;font-weight:700;
+  padding:3px 9px;border-radius:20px;white-space:nowrap;
+}
+.today-card .tc-day{font-size:12px;color:var(--rec);flex:1}
+.today-card .tc-dur{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--ink)}
+.today-card h3{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.today-card .tc-detail{font-size:13px;color:var(--ink3);line-height:1.5}
+.today-card .tc-fc{
+  margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;
+}
+.today-card .fc-chip{
+  font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;
+}
+
+/* Fatigue semaphore */
+.semaphore{
+  background:#fff;border-radius:var(--r);padding:16px;
+  box-shadow:var(--shadow);border:1px solid var(--paper2);
+}
+.semaphore .sem-title{font-size:13px;font-weight:600;color:var(--rec);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
+.sem-lights{display:flex;gap:8px;margin-bottom:12px}
+.sem-light{
+  flex:1;height:6px;border-radius:3px;
+  background:var(--paper2);
+}
+.sem-light.on-green{background:var(--green)}
+.sem-light.on-yellow{background:var(--yellow)}
+.sem-light.on-red{background:var(--red)}
+.sem-indicators{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sem-item{background:var(--paper);border-radius:var(--r-sm);padding:10px;text-align:center}
+.sem-item label{display:block;font-size:10px;font-weight:600;color:var(--rec);text-transform:uppercase;margin-bottom:4px}
+.sem-item .sem-dots{display:flex;justify-content:center;gap:4px}
+.sem-dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--paper2);background:#fff;cursor:pointer;transition:all .15s;font-size:12px;display:flex;align-items:center;justify-content:center}
+.sem-dot.active-sleep{background:#1e6e7a;border-color:#1e6e7a;color:#fff}
+.sem-dot.active-energy{background:#2d9a6a;border-color:#2d9a6a;color:#fff}
+.sem-dot.active-stress{background:#c07830;border-color:#c07830;color:#fff}
+.sem-dot.active-pain{background:#c04040;border-color:#c04040;color:#fff}
+.sem-status{margin-top:10px;text-align:center;font-family:var(--font-display);font-size:16px;font-weight:700}
+
+/* ─── PLAN VIEW ───────────────────────────────────────────── */
+.filter-bar{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.filter-bar::-webkit-scrollbar{display:none}
+.filter-btn{
+  flex-shrink:0;font-family:var(--font-display);font-size:13px;font-weight:700;
+  padding:7px 14px;border-radius:20px;border:2px solid var(--paper2);
+  background:#fff;color:var(--rec);cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.filter-btn.active{background:#2d6b52;border-color:#2d6b52;color:#fff}
+
+.week-group{margin-bottom:20px}
+.week-header{
+  display:flex;align-items:center;gap:10px;margin-bottom:10px;
+  cursor:pointer;
+}
+.week-number{
+  background:#2d6b52;
+  font-family:var(--font-display);font-size:15px;font-weight:900;
+  background:var(--ink);color:#fff;padding:4px 12px;border-radius:20px;
+  white-space:nowrap;
+}
+.week-phase-tag{
+  font-family:var(--font-display);font-size:12px;font-weight:700;
+  padding:3px 10px;border-radius:20px;
+}
+.week-stats{font-size:11px;color:var(--rec);flex:1;text-align:right}
+.week-arrow{font-size:16px;color:var(--rec);transition:transform .2s}
+.week-arrow.open{transform:rotate(90deg)}
+
+.session-card{
+  background:#fff;border-radius:var(--r-sm);padding:14px;
+  margin-bottom:8px;box-shadow:0 1px 8px rgba(26,74,53,.07);
+  border-left:3px solid #d4ede6;cursor:pointer;
+  transition:transform .1s;
+}
+.session-card:active{transform:scale(.99)}
+.session-card.completed{background:#f8fffe;border-left-color:var(--green)}
+.session-card .sc-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.session-card .sc-day{font-size:12px;font-weight:600;color:var(--rec);width:70px;flex-shrink:0}
+.session-card .sc-type{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--ink);flex:1}
+.session-card .sc-dur{font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--ink3)}
+.session-card .sc-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap}
+.session-card .sc-detail{font-size:12px;color:var(--ink3);line-height:1.5;display:none}
+.session-card.expanded .sc-detail{display:block}
+.session-card .sc-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.session-card .sc-meta-item{font-size:11px;color:var(--rec);display:flex;align-items:center;gap:3px}
+.session-card .sc-check{
+  width:28px;height:28px;border-radius:50%;border:2px solid var(--paper2);
+  background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:14px;transition:all .2s;flex-shrink:0;
+}
+.session-card.completed .sc-check{background:var(--green);border-color:var(--green);color:#fff}
+.session-card .sc-rpe-row{margin-top:10px;padding-top:10px;border-top:1px solid var(--paper2)}
+.sc-rpe-row label{font-size:11px;font-weight:600;color:var(--rec);text-transform:uppercase;display:block;margin-bottom:6px}
+.rpe-btns{display:flex;gap:4px}
+.rpe-btn{
+  flex:1;height:30px;border:none;border-radius:6px;background:var(--paper2);
+  font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--rec);
+  cursor:pointer;transition:all .15s;
+}
+.rpe-btn.selected{background:#2d6b52;color:#fff}
+.dur-input-row{margin-top:8px;display:flex;align-items:center;gap:8px}
+.dur-input-row label{font-size:11px;font-weight:600;color:var(--rec);text-transform:uppercase}
+.dur-input{
+  width:80px;padding:6px 10px;border:2px solid var(--paper2);border-radius:8px;
+  font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--ink);
+  background:#fff;text-align:center;
+}
+.dur-input:focus{outline:none;border-color:#3d8a6e}
+.save-btn{
+  flex:1;padding:8px;border:none;border-radius:8px;
+  background:#2d6b52;color:#fff;
+  font-family:var(--font-display);font-size:14px;font-weight:700;cursor:pointer;
+  transition:background .15s;
+}
+.save-btn:active{background:#3d8a6e}
+
+/* ─── FUERZA VIEW ─────────────────────────────────────────── */
+.strength-phase{margin-bottom:24px}
+.sp-header{
+  border-radius:var(--r);padding:14px 16px;margin-bottom:10px;
+  display:flex;align-items:center;justify-content:space-between;cursor:pointer;
+}
+.sp-header h3{font-family:var(--font-display);font-size:18px;font-weight:900;color:#fff}
+.sp-header .sp-info{font-size:12px;color:rgba(255,255,255,.8)}
+.sp-body{display:none}
+.sp-body.open{display:block}
+
+.exercise-card{
+  background:#fff;border-radius:var(--r-sm);padding:14px;
+  margin-bottom:8px;box-shadow:var(--shadow);display:flex;gap:12px;
+}
+.ex-icon{
+  width:42px;height:42px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;font-size:20px;flex-shrink:0;
+}
+.ex-body{flex:1;min-width:0}
+.ex-name{font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--ink);margin-bottom:2px}
+.ex-series{font-size:12px;font-weight:600;color:#2d6b52;margin-bottom:4px}
+.ex-note{font-size:12px;color:var(--ink3);line-height:1.4}
+.ex-prog{font-size:11px;color:var(--rec);margin-top:4px;font-style:italic}
+
+/* ─── SEGUIMIENTO / LOG ───────────────────────────────────── */
+.weekly-summary{
+  background:#fff;border-radius:var(--r);padding:16px;
+  box-shadow:var(--shadow);margin-bottom:16px;
+}
+.ws-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.ws-header h3{font-family:var(--font-display);font-size:18px;font-weight:700}
+.ws-week-nav{display:flex;align-items:center;gap:10px}
+.ws-week-nav button{
+  width:32px;height:32px;border:2px solid var(--paper2);border-radius:50%;
+  background:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.ws-week-label{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--ink);min-width:50px;text-align:center}
+
+.load-chart{margin-bottom:12px}
+.load-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.load-bar-label{font-size:11px;font-weight:600;width:72px;color:var(--rec);text-align:right;flex-shrink:0}
+.load-bar-track{flex:1;height:18px;background:var(--paper2);border-radius:6px;overflow:hidden;position:relative}
+.load-bar-fill{height:100%;border-radius:6px;transition:width .4s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:6px}
+.load-bar-fill span{font-size:10px;font-weight:700;color:#fff}
+
+.ws-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.ws-stat{background:#edf7f3;border-radius:var(--r-sm);padding:10px;text-align:center;border:1px solid #d4ede6}
+.ws-stat .wsv{font-family:var(--font-display);font-size:20px;font-weight:900;color:#1a4a35}
+.ws-stat .wsl{font-size:10px;color:var(--rec);text-transform:uppercase;font-weight:600}
+
+.log-form{background:#fff;border-radius:var(--r);padding:16px;box-shadow:var(--shadow);margin-bottom:10px}
+.log-form h4{font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:12px}
+.form-row{margin-bottom:12px}
+.form-row label{display:block;font-size:11px;font-weight:700;color:var(--rec);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.form-row input[type=number],
+.form-row input[type=text],
+.form-row textarea{
+  width:100%;padding:10px 12px;border:2px solid var(--paper2);border-radius:8px;
+  font-family:var(--font-body);font-size:14px;color:var(--ink);background:#fff;
+}
+.form-row input:focus, .form-row textarea:focus{outline:none;border-color:#3d8a6e}
+.form-row textarea{resize:none;height:64px}
+.btn-primary{
+  width:100%;padding:14px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,#1a4a35,#3d8a6e);color:#fff;
+  font-family:var(--font-display);font-size:17px;font-weight:700;cursor:pointer;
+  transition:background .15s;
+}
+.btn-primary:active{background:#3d8a6e}
+
+/* ─── NUTRICIÓN ───────────────────────────────────────────── */
+.nut-block{
+  background:#fff;border-radius:var(--r);padding:16px;
+  box-shadow:0 2px 10px rgba(26,74,53,.08);margin-bottom:12px;
+  border-left:4px solid #3d8a6e;
+}
+.nut-block.warn{border-left-color:var(--yellow)}
+.nut-block.alert{border-left-color:var(--red)}
+.nut-block h4{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.nut-block .nut-km{font-size:12px;color:var(--rec);margin-bottom:10px}
+.nut-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.nut-item{background:var(--paper);border-radius:var(--r-sm);padding:8px;text-align:center}
+.nut-item .nv{font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--ink)}
+.nut-item .nl{font-size:10px;color:var(--rec);text-transform:uppercase;font-weight:600}
+.nut-source{font-size:12px;color:var(--ink3);margin-bottom:6px;line-height:1.5}
+.nut-alert{font-size:12px;font-weight:600;line-height:1.4}
+.nut-alert.ok{color:var(--f1)}
+.nut-alert.warn{color:var(--f3)}
+.nut-alert.bad{color:var(--red)}
+
+/* ─── FC ZONES ────────────────────────────────────────────── */
+.zone-card{
+  border-radius:var(--r);padding:14px 16px;margin-bottom:8px;
+  display:flex;align-items:center;gap:12px;
+}
+.zone-bpm{font-family:var(--font-display);font-size:26px;font-weight:900;white-space:nowrap}
+.zone-info h4{font-family:var(--font-display);font-size:17px;font-weight:700;margin-bottom:2px}
+.zone-info p{font-size:12px;line-height:1.4}
+
+/* ─── MODAL ───────────────────────────────────────────────── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+  z-index:200;align-items:flex-end;justify-content:center;
+}
+.modal-overlay.open{display:flex}
+.modal-sheet{
+  background:#fff;border-radius:20px 20px 0 0;
+  padding:20px;width:100%;max-width:700px;
+  max-height:85vh;overflow-y:auto;
+  animation:slideUp .3s ease;
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:#d4ede6;border-radius:2px;margin:0 auto 16px}
+.modal-sheet h2{font-family:var(--font-display);font-size:22px;font-weight:900;margin-bottom:4px}
+.modal-sheet .modal-sub{font-size:13px;color:var(--rec);margin-bottom:16px}
+.modal-body-text{font-size:14px;color:var(--ink3);line-height:1.7}
+.modal-close{
+  position:absolute;top:16px;right:16px;width:32px;height:32px;
+  border:none;background:var(--paper2);border-radius:50%;cursor:pointer;
+  font-size:16px;display:flex;align-items:center;justify-content:center;
+}
+.info-row{display:flex;gap:8px;margin-bottom:8px}
+.info-label{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--rec);width:90px;flex-shrink:0;padding-top:2px}
+.info-value{font-size:13px;color:var(--ink);line-height:1.5;flex:1}
+
+/* ─── TYPE COLORS ─────────────────────────────────────────── */
+.badge-fuerza{background:#dde8c8;color:#4a6a2d}
+.badge-z1{background:#d4ede6;color:#2d7a5e}
+.badge-z2{background:#c8e8ed;color:#1e6e7a}
+.badge-z3{background:#f5e8d4;color:#c07830}
+.badge-rec{background:#e8f0ec;color:#6a8a7a}
+.badge-larga{background:#d4ede6;color:#1a4a35}
+.badge-objetivo{background:#f5e8d4;color:#7a4a2d}
+
+/* ─── TOAST ───────────────────────────────────────────────── */
+.toast{
+  position:fixed;top:64px;left:50%;transform:translateX(-50%);
+  background:#1a4a35;color:#fff;padding:10px 18px;border-radius:20px;
+  font-size:13px;font-weight:600;z-index:300;
+  opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;
+}
+.toast.show{opacity:1}
+
+/* ─── SYNC & CONFIG ──────────────────────────────────────────── */
+.sync-hero{
+  background:linear-gradient(135deg,#1a4a35 0%,#2d6b52 100%);
+  border-radius:var(--r);padding:20px;margin-bottom:16px;
+  border:1px solid #3d8a6e;
+}
+.sync-hero-title{font-family:var(--font-display);font-size:20px;font-weight:900;color:#fff;margin-bottom:4px}
+.sync-hero-sub{font-size:12px;color:#8899aa;margin-bottom:16px;line-height:1.5}
+.sync-status-bar{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border-radius:8px;padding:10px 14px}
+.sync-dot{width:10px;height:10px;border-radius:50%;background:#555;flex-shrink:0;transition:all .3s}
+.sync-dot.connected{background:var(--green);box-shadow:0 0 0 3px rgba(0,200,83,.25)}
+.sync-dot.syncing{background:var(--gold);animation:pulse 1s infinite}
+.sync-dot.error{background:var(--red)}
+.sync-dot.offline{background:#555}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+#syncLabel{font-size:13px;font-weight:600;color:#ccc;flex:1}
+.sync-last-time{font-size:11px;color:#8899aa}
+
+/* Estado: sin perfil */
+.sync-setup{margin-top:16px}
+.sync-setup-step{background:rgba(255,255,255,.05);border-radius:var(--r-sm);padding:14px;margin-bottom:10px;border:1px solid rgba(255,255,255,.08)}
+.sync-setup-num{font-family:var(--font-display);font-size:11px;font-weight:700;color:#a8d8c8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.sync-setup-step p{font-size:13px;color:#aaa;line-height:1.5;margin-bottom:10px}
+.btn-sync{width:100%;padding:14px;border:none;border-radius:10px;background:#5aab8a;color:#fff;font-family:var(--font-display);font-size:16px;font-weight:700;cursor:pointer;transition:opacity .15s;letter-spacing:.3px}
+.btn-sync:active{opacity:.85}
+.sync-or{text-align:center;font-size:12px;color:#666;padding:8px 0;display:flex;align-items:center;gap:10px}
+.sync-or::before,.sync-or::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08)}
+.sync-input-row{display:flex;gap:8px}
+.sync-code-input{flex:1;padding:12px;border:2px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(255,255,255,.06);color:#fff;font-family:var(--font-display);font-size:18px;font-weight:700;letter-spacing:5px;text-transform:uppercase;text-align:center}
+.sync-code-input::placeholder{color:#555;letter-spacing:2px;font-size:14px}
+.sync-code-input:focus{outline:none;border-color:#5aab8a}
+.btn-sync-connect{padding:12px 18px;border:none;border-radius:8px;background:rgba(255,255,255,.12);color:#fff;font-family:var(--font-display);font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s}
+.btn-sync-connect:active{background:rgba(255,255,255,.2)}
+
+/* Estado: conectado */
+.sync-connected-block{margin-top:16px}
+.sync-code-display{background:rgba(255,255,255,.05);border-radius:var(--r-sm);padding:16px;text-align:center;margin-bottom:12px;border:1px dashed rgba(255,255,255,.15)}
+.sync-code-label{font-size:10px;font-weight:700;color:#8899aa;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.sync-code-value{font-family:var(--font-display);font-size:38px;font-weight:900;color:#a8d8c8;letter-spacing:8px;line-height:1}
+.sync-code-hint{font-size:11px;color:#8899aa;margin-top:6px;line-height:1.5}
+.sync-actions-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.btn-sync-action{padding:10px 8px;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(255,255,255,.06);color:#ccc;font-family:var(--font-display);font-size:13px;font-weight:600;cursor:pointer;text-align:center;transition:background .15s}
+.btn-sync-action:active{background:rgba(255,255,255,.14)}
+.btn-sync-disconnect{width:100%;padding:10px;border:1px solid rgba(231,57,57,.3);border-radius:8px;background:rgba(231,57,57,.07);color:#e88;font-family:var(--font-display);font-size:13px;font-weight:600;cursor:pointer}
+.sync-share-hint{background:rgba(0,200,83,.08);border:1px solid rgba(0,200,83,.2);border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#4caf50;line-height:1.5;text-align:center}
+
+/* Fecha inicio */
+.config-card{background:#fff;border-radius:var(--r);padding:16px;box-shadow:var(--shadow);margin-bottom:16px;border:1px solid var(--paper2)}
+.config-section{margin-bottom:14px}
+.config-label{font-size:12px;font-weight:700;color:var(--rec);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:block}
+.config-date-input{width:100%;padding:12px;border:2px solid var(--paper2);border-radius:8px;font-family:var(--font-body);font-size:16px;color:var(--ink);background:var(--paper);-webkit-appearance:none}
+.config-date-input:focus{outline:none;border-color:#3d8a6e;background:#fff}
+.config-info{background:var(--paper);border-radius:var(--r-sm);padding:10px 12px;margin-top:10px}
+.config-info-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--paper2);font-size:12px}
+.config-info-row:last-child{border-bottom:none}
+.config-info-key{color:var(--rec);font-weight:600}
+.config-info-val{color:var(--ink);font-weight:700;font-family:var(--font-display);font-size:14px}
+.config-warn{background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:12px;color:#795548;line-height:1.5}
+
+/* ─── MISC ────────────────────────────────────────────────── */
+.empty-state{text-align:center;padding:40px 20px;color:var(--rec)}
+.empty-state .es-icon{font-size:48px;margin-bottom:12px}
+.phase-f1{color:var(--f1)}
+.phase-f2{color:var(--f2)}
+.phase-f3{color:var(--f3)}
+.phase-f4{color:var(--f4)}
+.phase-tag-f1{background:#d4ede6;color:#1a4a35}
+.phase-tag-f2{background:#c8e8ed;color:#1e6e7a}
+.phase-tag-f3{background:#ddedc8;color:#5a7a2d}
+.phase-tag-f4{background:#edddd4;color:#7a4a2d}
+.sp-f1{background:linear-gradient(135deg,#1a4a35,#2d6b52)}
+.sp-f2{background:linear-gradient(135deg,#1e6e7a,#2d9a9a)}
+.sp-f3{background:linear-gradient(135deg,#5a7a2d,#7aaa3d)}
+.sp-f4{background:linear-gradient(135deg,#7a4a2d,#aa6a3d)}
+.note-bubble{background:#edf7f3;border-radius:var(--r-sm);padding:10px 12px;font-size:12px;color:#2d6b52;margin-top:10px;line-height:1.5;border-left:3px solid #5aab8a}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="logo">RETO DEL INDIO<span> 105k  GERMAN QUINTANA </span></div>
+  <div class="race-badge" id="daysLeft">— días</div>
+</div>
+
+<!-- MAIN -->
+<main>
+  <!-- ════ DASHBOARD ════ -->
+  <div id="view-dashboard" class="view active">
+
+    <div class="hero" id="heroCard">
+      <div class="phase-badge" id="heroPhaseBadge">Fase 1</div>
+      <h1 id="heroTitle">Semana 1 de 19</h1>
+      <div class="sub" id="heroSub">Reconstrucción aeróbica · Z1–Z2</div>
+      <div class="progress-row">
+        <div class="progress-bar"><div class="progress-fill" id="heroProgress" style="width:0%"></div></div>
+        <div class="progress-label" id="heroPercent">0%</div>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Semana actual</div>
+        <div class="kpi-value" id="kpiWeek">S01</div>
+        <div class="kpi-unit" id="kpiPhase">Fase 1 · Reconstrucción</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Tirada larga</div>
+        <div class="kpi-value" id="kpiLong">50</div>
+        <div class="kpi-unit">min esta semana</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Carga semana</div>
+        <div class="kpi-value" id="kpiLoad">—</div>
+        <div class="kpi-unit">Completadas × RPE</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Sesiones OK</div>
+        <div class="kpi-value" id="kpiSessions">0/7</div>
+        <div class="kpi-unit">esta semana</div>
+      </div>
+    </div>
+
+    <div class="section-title">📅 Hoy</div>
+    <div id="todayContainer"></div>
+
+    <div class="section-title">😴 Estado de Fatiga</div>
+    <div class="semaphore">
+      <div class="sem-title">Registro de hoy · escala 1–5</div>
+      <div class="sem-lights">
+        <div class="sem-light" id="sl1"></div>
+        <div class="sem-light" id="sl2"></div>
+        <div class="sem-light" id="sl3"></div>
+        <div class="sem-light" id="sl4"></div>
+        <div class="sem-light" id="sl5"></div>
+      </div>
+      <div class="sem-indicators">
+        <div class="sem-item">
+          <label>😴 Sueño</label>
+          <div class="sem-dots" id="dots-sleep"></div>
+        </div>
+        <div class="sem-item">
+          <label>⚡ Energía</label>
+          <div class="sem-dots" id="dots-energy"></div>
+        </div>
+        <div class="sem-item">
+          <label>😤 Estrés</label>
+          <div class="sem-dots" id="dots-stress"></div>
+        </div>
+        <div class="sem-item">
+          <label>🦵 Dolor</label>
+          <div class="sem-dots" id="dots-pain"></div>
+        </div>
+      </div>
+      <div class="sem-status" id="semStatus">— Completa para ver semáforo</div>
+    </div>
+
+  </div><!-- /dashboard -->
+
+  <!-- ════ PLAN ════ -->
+  <div id="view-plan" class="view">
+    <div class="filter-bar" id="filterBar">
+      <button class="filter-btn active" data-filter="all">Todo</button>
+      <button class="filter-btn" data-filter="Fase 1">F1 · Recons.</button>
+      <button class="filter-btn" data-filter="Fase 2">F2 · Base</button>
+      <button class="filter-btn" data-filter="Fase 3">F3 · Específico</button>
+      <button class="filter-btn" data-filter="Fase 4">F4 · Taper</button>
+    </div>
+    <div id="planContainer"></div>
+  </div>
+
+  <!-- ════ FUERZA ════ -->
+  <div id="view-fuerza" class="view">
+    <div id="fuerzaContainer"></div>
+  </div>
+
+  <!-- ════ LOG ════ -->
+  <div id="view-log" class="view">
+    <div class="weekly-summary">
+      <div class="ws-header">
+        <h3>Resumen</h3>
+        <div class="ws-week-nav">
+          <button onclick="changeLogWeek(-1)">‹</button>
+          <span class="ws-week-label" id="logWeekLabel">S01</span>
+          <button onclick="changeLogWeek(1)">›</button>
+        </div>
+      </div>
+      <div class="load-chart" id="loadChart"></div>
+      <div class="ws-stats" id="wsStats"></div>
+    </div>
+
+    <div class="section-title">📝 Registrar Sesión</div>
+    <div class="log-form">
+      <h4 id="logFormTitle">Selecciona una sesión del plan</h4>
+      <div class="form-row">
+        <label>Sesión</label>
+        <select id="logSessionSelect" style="width:100%;padding:10px 12px;border:2px solid var(--paper2);border-radius:8px;font-family:var(--font-body);font-size:14px;color:var(--ink);background:#fff">
+          <option value="">— Elegir sesión —</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Duración real (min)</label>
+        <input type="number" id="logDuracion" placeholder="ej. 45" min="0" max="400">
+      </div>
+      <div class="form-row">
+        <label>RPE percibido (1–10)</label>
+        <div class="rpe-btns" id="logRpeBtns"></div>
+      </div>
+      <div class="form-row">
+        <label>Notas (opcional)</label>
+        <textarea id="logNotas" placeholder="¿Cómo te sentiste? ¿Algo a destacar?"></textarea>
+      </div>
+      <button class="btn-primary" onclick="saveLog()">💾 Guardar registro</button>
+    </div>
+  </div>
+
+  <!-- ════ CONFIG ════ -->
+  <div id="view-config" class="view">
+
+    <!-- SINCRONIZACIÓN CLOUD -->
+    <div class="sync-hero">
+      <div class="sync-hero-title">☁️ Sincronización Online</div>
+      <div class="sync-hero-sub">Accede a tu progreso desde cualquier dispositivo usando un código de 6 letras. Tus datos se guardan automáticamente.</div>
+      <div class="sync-status-bar">
+        <div class="sync-dot offline" id="syncDot"></div>
+        <span id="syncLabel">Verificando...</span>
+        <span class="sync-last-time" id="syncLast"></span>
+      </div>
+      <!-- Sin perfil -->
+      <div class="sync-setup" id="syncSetup">
+        <div class="sync-setup-step">
+          <div class="sync-setup-num">📱 Primer dispositivo</div>
+          <p>Crea un perfil nuevo. Se genera un código único para tu plan.</p>
+          <button class="btn-sync" onclick="createNewProfile()">🆕 Crear mi perfil en la nube</button>
+        </div>
+        <div class="sync-or">o ya tienes un código</div>
+        <div class="sync-setup-step">
+          <div class="sync-setup-num">🔄 Conectar dispositivo existente</div>
+          <p>Ingresa el código de 6 letras de tu otro dispositivo para sincronizar.</p>
+          <div class="sync-input-row">
+            <input id="syncCodeInput" class="sync-code-input" placeholder="ABC123" maxlength="8" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+            <button class="btn-sync-connect" onclick="loadProfile()">Conectar</button>
+          </div>
+        </div>
+      </div>
+      <!-- Conectado -->
+      <div class="sync-connected-block" id="syncConnectedBlock" style="display:none">
+        <div class="sync-share-hint">📋 Copia este código y úsalo en tus otros dispositivos</div>
+        <div class="sync-code-display" onclick="copyCode()" style="cursor:pointer">
+          <div class="sync-code-label">Tu código · toca para copiar</div>
+          <div class="sync-code-value" id="syncCodeDisplay">——————</div>
+          <div class="sync-code-hint">📱 Funciona en móvil, tablet y ordenador</div>
+        </div>
+        <div class="sync-actions-grid">
+          <button class="btn-sync-action" onclick="forcePush()">📤 Subir datos</button>
+          <button class="btn-sync-action" onclick="forcePull()">📥 Bajar datos</button>
+        </div>
+        <button class="btn-sync-disconnect" onclick="disconnectProfile()">🔌 Desconectar este dispositivo</button>
+      </div>
+    </div>
+
+    <!-- FECHA DE INICIO -->
+    <div class="section-title">📅 Fecha de Inicio del Programa</div>
+    <div class="config-card">
+      <div class="config-section">
+        <label class="config-label">Primer Lunes del programa</label>
+        <input type="date" id="startDateInput" class="config-date-input" onchange="previewStartDate()">
+      </div>
+      <div class="config-info" id="startDateInfo"></div>
+      <div class="config-warn" id="startDateWarn" style="display:none">
+        ⚠️ Al cambiar la fecha se recalculan todas las sesiones. Tu progreso registrado se mantiene intacto.
+      </div>
+      <button class="btn-primary" style="margin-top:14px" onclick="applyStartDate()">✅ Aplicar nueva fecha de inicio</button>
+    </div>
+
+    <!-- ZONAS FC -->
+    <div class="section-title" style="margin-top:8px">💓 Zonas FC (CPET)</div>
+    <div class="zone-card" style="background:var(--z1bg)">
+      <div class="zone-bpm" style="color:var(--z1)">Z1</div>
+      <div class="zone-info"><h4 style="color:var(--z1)">110–135 bpm</h4><p>Recuperación · caminatas · trotes muy suaves. Usar tras tiradas largas.</p></div>
+    </div>
+    <div class="zone-card" style="background:var(--z2bg)">
+      <div class="zone-bpm" style="color:var(--z2)">Z2</div>
+      <div class="zone-info"><h4 style="color:var(--z2)">136–158 bpm</h4><p>Zona reina del ultra. Base aeróbica y tiradas largas. Conversacional y sostenible.</p></div>
+    </div>
+    <div class="zone-card" style="background:var(--z3bg)">
+      <div class="zone-bpm" style="color:var(--z3)">Z3 (VT1)</div>
+      <div class="zone-info"><h4 style="color:var(--z3)">159–166 bpm</h4><p>Tempo controlado y subidas. Solo desde Fase 2, máx. 15% del volumen.</p></div>
+    </div>
+
+  </div>
+
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-sheet" id="modalSheet" style="position:relative">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeModal(null,true)">✕</button>
+    <h2 id="modalTitle"></h2>
+    <div class="modal-sub" id="modalSub"></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav id="bottomnav">
+  <button class="active" onclick="showView('dashboard',this)">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Dashboard
+  </button>
+  <button onclick="showView('plan',this)">
+    <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    Plan
+  </button>
+  <button onclick="showView('log',this)">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    Log
+  </button>
+  <button onclick="showView('fuerza',this)">
+    <svg viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M6 12h12M4 6h4M16 6h4M4 18h4M16 18h4"/></svg>
+    Fuerza
+  </button>
+  <button onclick="showView('config',this)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Config
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════
+const PLAN_DATA = [{"semana":1,"fase":"Fase 1","fecha":"2026-03-30","dia":"Lunes","tipo":"Fuerza","duracion":25,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Activación: Puente de glúteo 2x12 (pausa 2s arriba), Bird dog 2x10/lado, Plancha 2x30s. Piernas: Sentadilla 2x10, Lunges 2x8/lado, Step-up bajo 2x10/lado. Gemelos: Elevaciones de talón 3x12 con bajada lenta (3s). RPE 4–5/10; terminar fresco.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":1,"fase":"Fase 1","fecha":"2026-03-31","dia":"Martes","tipo":"Carrera base","duracion":30,"zona_fc":"Z1–Z2","fc_objetivo":"110–145 bpm","terreno":"Plano / fácil","detalle":"10 min caminata+trote muy suave + 20 min trote continuo. Si la FC sube, caminar 1–2 min y retomar.","objetivo":"Reactivar sistema aeróbico y tolerancia al impacto","sensaciones":"Muy fácil; debes sentir que podrías hacer más","rpe":"3"},{"semana":1,"fase":"Fase 1","fecha":"2026-04-01","dia":"Miércoles","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Movilidad 10–15 min. Caminata suave opcional 15 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":1,"fase":"Fase 1","fecha":"2026-04-02","dia":"Jueves","tipo":"Carrera base","duracion":35,"zona_fc":"Z1–Z2","fc_objetivo":"110–145 bpm","terreno":"Plano / fácil","detalle":"5 min caminar + 30 min trote continuo controlado. Mantener respiración cómoda.","objetivo":"Construir base aeróbica inicial","sensaciones":"Cómodo y estable","rpe":"3"},{"semana":1,"fase":"Fase 1","fecha":"2026-04-03","dia":"Viernes","tipo":"Fuerza","duracion":25,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Activación: Puente de glúteo 2x12 (pausa 2s arriba), Bird dog 2x10/lado, Plancha 2x30s. Piernas: Sentadilla 2x10, Lunges 2x8/lado, Step-up bajo 2x10/lado. Gemelos: Elevaciones de talón 3x12 con bajada lenta (3s). RPE 4–5/10; terminar fresco.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":1,"fase":"Fase 1","fecha":"2026-04-04","dia":"Sábado","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o caminata muy suave opcional 15–20 min + movilidad 10 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":1,"fase":"Fase 1","fecha":"2026-04-05","dia":"Domingo","tipo":"Tirada larga","duracion":50,"zona_fc":"Z1–Z2","fc_objetivo":"110–145 bpm","terreno":"Mixto suave","detalle":"Rodaje continuo suave. Caminar en subidas si la FC supera 145. Probar hidratación básica.","objetivo":"Empezar a recuperar resistencia","sensaciones":"Ligero, sin fatiga acumulada","rpe":"4"},{"semana":2,"fase":"Fase 1","fecha":"2026-04-06","dia":"Lunes","tipo":"Fuerza","duracion":25,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Activación: Puente de glúteo 2x12 (pausa 2s arriba), Bird dog 2x10/lado, Plancha 2x30s. Piernas: Sentadilla 2x10, Lunges 2x8/lado, Step-up bajo 2x10/lado. Gemelos: Elevaciones de talón 3x12 con bajada lenta (3s). RPE 4–5/10; terminar fresco.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":2,"fase":"Fase 1","fecha":"2026-04-07","dia":"Martes","tipo":"Carrera base","duracion":35,"zona_fc":"Z1–Z2","fc_objetivo":"110–148 bpm","terreno":"Plano","detalle":"25 min trote suave + 3 progresivos de 15 s con recuperación caminando/trote 45 s + 5 min suaves.","objetivo":"Activación neuromuscular sin fatiga","sensaciones":"Controlado, con algo de chispa","rpe":"3"},{"semana":2,"fase":"Fase 1","fecha":"2026-04-08","dia":"Miércoles","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Movilidad 10–15 min y foam roller suave opcional.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":2,"fase":"Fase 1","fecha":"2026-04-09","dia":"Jueves","tipo":"Carrera base","duracion":40,"zona_fc":"Z2","fc_objetivo":"140–150 bpm","terreno":"Plano / fácil","detalle":"40 min continuos en Z2 baja-media. Si hay deriva cardíaca, bajar el ritmo.","objetivo":"Consolidar base aeróbica","sensaciones":"Fácil pero trabajando","rpe":"4"},{"semana":2,"fase":"Fase 1","fecha":"2026-04-10","dia":"Viernes","tipo":"Fuerza","duracion":25,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Activación: Puente de glúteo 2x12 (pausa 2s arriba), Bird dog 2x10/lado, Plancha 2x30s. Piernas: Sentadilla 2x10, Lunges 2x8/lado, Step-up bajo 2x10/lado. Gemelos: Elevaciones de talón 3x12 con bajada lenta (3s). RPE 4–5/10; terminar fresco.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":2,"fase":"Fase 1","fecha":"2026-04-11","dia":"Sábado","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o caminata muy suave opcional 15–20 min + movilidad 10 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":2,"fase":"Fase 1","fecha":"2026-04-12","dia":"Domingo","tipo":"Tirada larga","duracion":60,"zona_fc":"Z2","fc_objetivo":"140–150 bpm","terreno":"Mixto suave","detalle":"60 min continuos. Llevar agua. Mantener ritmo conversacional.","objetivo":"Extender duración total sin fatiga","sensaciones":"Sostenible y cómodo","rpe":"4"},{"semana":3,"fase":"Fase 1","fecha":"2026-04-13","dia":"Lunes","tipo":"Fuerza","duracion":25,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Activación: Puente de glúteo 2x12 (pausa 2s arriba), Bird dog 2x10/lado, Plancha 2x30s. Piernas: Sentadilla 2x10, Lunges 2x8/lado, Step-up bajo 2x10/lado. Gemelos: Elevaciones de talón 3x12 con bajada lenta (3s). RPE 4–5/10; terminar fresco. Añadir pausa de 1 s abajo en sentadilla si todo va bien.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":3,"fase":"Fase 1","fecha":"2026-04-14","dia":"Martes","tipo":"Carrera base","duracion":40,"zona_fc":"Z2","fc_objetivo":"140–150 bpm","terreno":"Mixto suave","detalle":"40 min continuos. Terreno levemente variado, sin cuestas fuertes.","objetivo":"Aumentar economía de carrera","sensaciones":"Respiración estable","rpe":"4"},{"semana":3,"fase":"Fase 1","fecha":"2026-04-15","dia":"Miércoles","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o caminata muy suave opcional 15–20 min + movilidad 10 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":3,"fase":"Fase 1","fecha":"2026-04-16","dia":"Jueves","tipo":"Carrera base","duracion":45,"zona_fc":"Z2","fc_objetivo":"145–152 bpm","terreno":"Mixto con ligeras subidas","detalle":"45 min. En pequeñas subidas caminar si la FC supera 152. No entrar en Z3.","objetivo":"Adaptar FC y técnica a desnivel suave","sensaciones":"Controlado; nunca forzado","rpe":"4"},{"semana":3,"fase":"Fase 1","fecha":"2026-04-17","dia":"Viernes","tipo":"Fuerza","duracion":25,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Activación: Puente de glúteo 2x12 (pausa 2s arriba), Bird dog 2x10/lado, Plancha 2x30s. Piernas: Sentadilla 2x10, Lunges 2x8/lado, Step-up bajo 2x10/lado. Gemelos: Elevaciones de talón 3x12 con bajada lenta (3s). RPE 4–5/10; terminar fresco.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":3,"fase":"Fase 1","fecha":"2026-04-18","dia":"Sábado","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso. Preparar hidratación y nutrición para el domingo.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":3,"fase":"Fase 1","fecha":"2026-04-19","dia":"Domingo","tipo":"Tirada larga","duracion":75,"zona_fc":"Z2","fc_objetivo":"140–155 bpm","terreno":"Trail suave / mixto","detalle":"75 min. Z2 estable. Probar 20–30 g de CHO/h si te sienta bien.","objetivo":"Recuperar resistencia de fondo","sensaciones":"Cansancio leve al final, pero recuperable","rpe":"5"},{"semana":4,"fase":"Fase 1","fecha":"2026-04-20","dia":"Lunes","tipo":"Fuerza","duracion":25,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Activación: Puente de glúteo 2x12 (pausa 2s arriba), Bird dog 2x10/lado, Plancha 2x30s. Piernas: Sentadilla 2x10, Lunges 2x8/lado, Step-up bajo 2x10/lado. Gemelos: Elevaciones de talón 3x12 con bajada lenta (3s). RPE 4–5/10; terminar fresco.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":4,"fase":"Fase 1","fecha":"2026-04-21","dia":"Martes","tipo":"Carrera base","duracion":45,"zona_fc":"Z2","fc_objetivo":"145–152 bpm","terreno":"Mixto suave","detalle":"45 min continuos, sin mirar ritmo; manda la FC.","objetivo":"Consolidar la base del retorno","sensaciones":"Cómodo y constante","rpe":"4"},{"semana":4,"fase":"Fase 1","fecha":"2026-04-22","dia":"Miércoles","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o caminata muy suave opcional 15–20 min + movilidad 10 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":4,"fase":"Fase 1","fecha":"2026-04-23","dia":"Jueves","tipo":"Carrera base","duracion":50,"zona_fc":"Z2","fc_objetivo":"145–155 bpm","terreno":"Mixto suave","detalle":"50 min continuos. Mantenerte por debajo de 155 bpm.","objetivo":"Cerrar fase 1 con estabilidad aeróbica","sensaciones":"Sólido, sin sensación de exigencia alta","rpe":"4"},{"semana":4,"fase":"Fase 1","fecha":"2026-04-24","dia":"Viernes","tipo":"Fuerza","duracion":25,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Activación: Puente de glúteo 2x12 (pausa 2s arriba), Bird dog 2x10/lado, Plancha 2x30s. Piernas: Sentadilla 2x10, Lunges 2x8/lado, Step-up bajo 2x10/lado. Gemelos: Elevaciones de talón 3x12 con bajada lenta (3s). RPE 4–5/10; terminar fresco.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":4,"fase":"Fase 1","fecha":"2026-04-25","dia":"Sábado","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o caminata muy suave opcional 15–20 min + movilidad 10 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":4,"fase":"Fase 1","fecha":"2026-04-26","dia":"Domingo","tipo":"Tirada larga","duracion":90,"zona_fc":"Z2","fc_objetivo":"140–155 bpm","terreno":"Trail suave / mixto","detalle":"90 min controlados. Caminar subidas si lo exige la FC. Practicar beber regularmente.","objetivo":"Llegar al final de la fase con 90 min sólidos","sensaciones":"Cansancio moderado, recuperación en 24 h","rpe":"5"},{"semana":5,"fase":"Fase 2","fecha":"2026-04-27","dia":"Lunes","tipo":"Fuerza","duracion":35,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla 3x10, Lunges 3x10/lado, Step-up medio 3x10/lado. Core: Plancha 3x40s, Bird dog 3x10/lado, Plancha lateral 2x30s/lado. Gemelos: Excéntricos 4x12 (subir 1s / bajar 3s). RPE 5–6/10; buena técnica, sin fallo.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":5,"fase":"Fase 2","fecha":"2026-04-28","dia":"Martes","tipo":"Carrera base","duracion":50,"zona_fc":"Z2","fc_objetivo":"140–152 bpm","terreno":"Plano / mixto","detalle":"50 min continuos en Z2 estable.","objetivo":"Construir motor aeróbico y economía de carrera","sensaciones":"Sostenible, sin exigencia alta","rpe":"4"},{"semana":5,"fase":"Fase 2","fecha":"2026-04-29","dia":"Miércoles","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o caminata muy suave opcional 15–20 min + movilidad 10 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":5,"fase":"Fase 2","fecha":"2026-04-30","dia":"Jueves","tipo":"Trabajo Z3 controlado","duracion":50,"zona_fc":"Z2–Z3","fc_objetivo":"159–162 bpm en bloques","terreno":"Mixto / subida suave","detalle":"15 min Z2 + 2x8 min Z3 (159–162) rec 5 min Z2 + enfriar. Z3 solo controlado; nunca a tope.","objetivo":"Elevar VT1 sin acumular demasiada fatiga","sensaciones":"Fuerte pero sostenible","rpe":"6"},{"semana":5,"fase":"Fase 2","fecha":"2026-05-01","dia":"Viernes","tipo":"Fuerza","duracion":35,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla 3x10, Lunges 3x10/lado, Step-up medio 3x10/lado. Core: Plancha 3x40s, Bird dog 3x10/lado, Plancha lateral 2x30s/lado. Gemelos: Excéntricos 4x12 (subir 1s / bajar 3s). RPE 5–6/10; buena técnica, sin fallo. Si hay fatiga alta del jueves, reduce 1 serie en pierna.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":5,"fase":"Fase 2","fecha":"2026-05-02","dia":"Sábado","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total. Caminata opcional 20–30 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":5,"fase":"Fase 2","fecha":"2026-05-03","dia":"Domingo","tipo":"Tirada larga","duracion":105,"zona_fc":"Z2","fc_objetivo":"140–155 bpm","terreno":"Trail progresivo","detalle":"105 min en trail o mixto. Practicar beber cada 15–20 min. Últimos 15 min muy controlados; no apretar.","objetivo":"Aumentar resistencia específica al trail","sensaciones":"Final con cansancio manejable","rpe":"6"},{"semana":6,"fase":"Fase 2","fecha":"2026-05-04","dia":"Lunes","tipo":"Fuerza","duracion":35,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla 3x10, Lunges 3x10/lado, Step-up medio 3x10/lado. Core: Plancha 3x40s, Bird dog 3x10/lado, Plancha lateral 2x30s/lado. Gemelos: Excéntricos 4x12 (subir 1s / bajar 3s). RPE 5–6/10; buena técnica, sin fallo.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":6,"fase":"Fase 2","fecha":"2026-05-05","dia":"Martes","tipo":"Carrera base","duracion":55,"zona_fc":"Z2","fc_objetivo":"140–152 bpm","terreno":"Plano / mixto","detalle":"55 min continuos en Z2 estable.","objetivo":"Construir motor aeróbico y economía de carrera","sensaciones":"Sostenible, sin exigencia alta","rpe":"4"},{"semana":6,"fase":"Fase 2","fecha":"2026-05-06","dia":"Miércoles","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o caminata muy suave opcional 15–20 min + movilidad 10 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":6,"fase":"Fase 2","fecha":"2026-05-07","dia":"Jueves","tipo":"Trabajo Z3 controlado","duracion":55,"zona_fc":"Z2–Z3","fc_objetivo":"159–163 bpm en bloques","terreno":"Mixto / subida suave","detalle":"15 min Z2 + 2x10 min Z3 (159–163) rec 5 min Z2 + enfriar. Z3 solo controlado; nunca a tope.","objetivo":"Elevar VT1 sin acumular demasiada fatiga","sensaciones":"Fuerte pero sostenible","rpe":"6"},{"semana":6,"fase":"Fase 2","fecha":"2026-05-08","dia":"Viernes","tipo":"Fuerza","duracion":35,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla 3x10, Lunges 3x10/lado, Step-up medio 3x10/lado. Core: Plancha 3x40s, Bird dog 3x10/lado, Plancha lateral 2x30s/lado. Gemelos: Excéntricos 4x12 (subir 1s / bajar 3s). RPE 5–6/10; buena técnica, sin fallo. Si hay fatiga alta del jueves, reduce 1 serie en pierna.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":6,"fase":"Fase 2","fecha":"2026-05-09","dia":"Sábado","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total. Caminata opcional 20–30 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":6,"fase":"Fase 2","fecha":"2026-05-10","dia":"Domingo","tipo":"Tirada larga","duracion":120,"zona_fc":"Z2","fc_objetivo":"140–155 bpm","terreno":"Trail progresivo","detalle":"120 min en trail o mixto. Practicar beber cada 15–20 min. Últimos 15 min muy controlados; no apretar.","objetivo":"Aumentar resistencia específica al trail","sensaciones":"Final con cansancio manejable","rpe":"6"},{"semana":7,"fase":"Fase 2","fecha":"2026-05-11","dia":"Lunes","tipo":"Fuerza","duracion":35,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla 3x10, Lunges 3x10/lado, Step-up medio 3x10/lado. Core: Plancha 3x40s, Bird dog 3x10/lado, Plancha lateral 2x30s/lado. Gemelos: Excéntricos 4x12 (subir 1s / bajar 3s). RPE 5–6/10; buena técnica, sin fallo.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":7,"fase":"Fase 2","fecha":"2026-05-12","dia":"Martes","tipo":"Carrera base","duracion":60,"zona_fc":"Z2","fc_objetivo":"140–152 bpm","terreno":"Plano / mixto","detalle":"60 min continuos en Z2. Incluir 4–6 rectas de técnica de 15 s si te notas suelto.","objetivo":"Construir motor aeróbico y economía de carrera","sensaciones":"Sostenible, sin exigencia alta","rpe":"4"},{"semana":7,"fase":"Fase 2","fecha":"2026-05-13","dia":"Miércoles","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o caminata muy suave opcional 15–20 min + movilidad 10 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":7,"fase":"Fase 2","fecha":"2026-05-14","dia":"Jueves","tipo":"Trabajo Z3 controlado","duracion":55,"zona_fc":"Z2–Z3","fc_objetivo":"159–164 bpm en bloques","terreno":"Mixto / subida suave","detalle":"15 min Z2 + 3x8 min Z3 (159–164) rec 4 min Z2 + enfriar. Z3 solo controlado; nunca a tope.","objetivo":"Elevar VT1 sin acumular demasiada fatiga","sensaciones":"Fuerte pero sostenible","rpe":"6"},{"semana":7,"fase":"Fase 2","fecha":"2026-05-15","dia":"Viernes","tipo":"Fuerza","duracion":35,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla 3x10, Lunges 3x10/lado, Step-up medio 3x10/lado. Core: Plancha 3x40s, Bird dog 3x10/lado, Plancha lateral 2x30s/lado. Gemelos: Excéntricos 4x12 (subir 1s / bajar 3s). RPE 5–6/10; buena técnica, sin fallo. Si hay fatiga alta del jueves, reduce 1 serie en pierna.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":7,"fase":"Fase 2","fecha":"2026-05-16","dia":"Sábado","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total. Caminata opcional 20–30 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":7,"fase":"Fase 2","fecha":"2026-05-17","dia":"Domingo","tipo":"Tirada larga","duracion":135,"zona_fc":"Z2","fc_objetivo":"140–155 bpm","terreno":"Trail progresivo","detalle":"135 min en trail o mixto. Practicar beber cada 15–20 min. Últimos 15 min muy controlados; no apretar.","objetivo":"Aumentar resistencia específica al trail","sensaciones":"Final con cansancio manejable","rpe":"6"},{"semana":8,"fase":"Fase 2","fecha":"2026-05-18","dia":"Lunes","tipo":"Fuerza","duracion":35,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla 3x10, Lunges 3x10/lado, Step-up medio 3x10/lado. Core: Plancha 3x40s, Bird dog 3x10/lado, Plancha lateral 2x30s/lado. Gemelos: Excéntricos 4x12 (subir 1s / bajar 3s). RPE 5–6/10; buena técnica, sin fallo.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":8,"fase":"Fase 2","fecha":"2026-05-19","dia":"Martes","tipo":"Carrera base","duracion":50,"zona_fc":"Z2","fc_objetivo":"140–152 bpm","terreno":"Plano / mixto","detalle":"50 min continuos en Z2. Incluir 4–6 rectas de técnica de 15 s si te notas suelto.","objetivo":"Construir motor aeróbico y economía de carrera","sensaciones":"Sostenible, sin exigencia alta","rpe":"4"},{"semana":8,"fase":"Fase 2","fecha":"2026-05-20","dia":"Miércoles","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o caminata muy suave opcional 15–20 min + movilidad 10 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":8,"fase":"Fase 2","fecha":"2026-05-21","dia":"Jueves","tipo":"Trabajo Z3 controlado","duracion":50,"zona_fc":"Z2–Z3","fc_objetivo":"159–162 bpm en bloques","terreno":"Mixto / subida suave","detalle":"Descarga: 15 min Z2 + 2x6 min Z3 suave (159–162) rec 4 min + enfriar. Z3 solo controlado; nunca a tope.","objetivo":"Elevar VT1 sin acumular demasiada fatiga","sensaciones":"Fuerte pero sostenible","rpe":"5"},{"semana":8,"fase":"Fase 2","fecha":"2026-05-22","dia":"Viernes","tipo":"Fuerza","duracion":35,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla 3x10, Lunges 3x10/lado, Step-up medio 3x10/lado. Core: Plancha 3x40s, Bird dog 3x10/lado, Plancha lateral 2x30s/lado. Gemelos: Excéntricos 4x12 (subir 1s / bajar 3s). RPE 5–6/10; buena técnica, sin fallo. Si hay fatiga alta del jueves, reduce 1 serie en pierna.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":8,"fase":"Fase 2","fecha":"2026-05-23","dia":"Sábado","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total. Prioriza sueño y movilidad.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":8,"fase":"Fase 2","fecha":"2026-05-24","dia":"Domingo","tipo":"Tirada larga","duracion":120,"zona_fc":"Z2","fc_objetivo":"140–155 bpm","terreno":"Trail progresivo","detalle":"120 min en trail o mixto. Practicar beber cada 15–20 min. Semana de descarga: bajar volumen, mantener técnica.","objetivo":"Aumentar resistencia específica al trail","sensaciones":"Final con cansancio manejable","rpe":"5"},{"semana":9,"fase":"Fase 2","fecha":"2026-05-25","dia":"Lunes","tipo":"Fuerza","duracion":35,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla 3x10, Lunges 3x10/lado, Step-up medio 3x10/lado. Core: Plancha 3x40s, Bird dog 3x10/lado, Plancha lateral 2x30s/lado. Gemelos: Excéntricos 4x12 (subir 1s / bajar 3s). RPE 5–6/10; buena técnica, sin fallo.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":9,"fase":"Fase 2","fecha":"2026-05-26","dia":"Martes","tipo":"Carrera base","duracion":65,"zona_fc":"Z2","fc_objetivo":"140–152 bpm","terreno":"Plano / mixto","detalle":"65 min continuos en Z2. Incluir 4–6 rectas de técnica de 15 s si te notas suelto.","objetivo":"Construir motor aeróbico y economía de carrera","sensaciones":"Sostenible, sin exigencia alta","rpe":"4"},{"semana":9,"fase":"Fase 2","fecha":"2026-05-27","dia":"Miércoles","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o caminata muy suave opcional 15–20 min + movilidad 10 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":9,"fase":"Fase 2","fecha":"2026-05-28","dia":"Jueves","tipo":"Trabajo Z3 controlado","duracion":60,"zona_fc":"Z2–Z3","fc_objetivo":"159–164 bpm","terreno":"Mixto / subida suave","detalle":"15 min Z2 + 20 min Z3 continuo (159–164) + enfriar. Z3 solo controlado; nunca a tope.","objetivo":"Elevar VT1 sin acumular demasiada fatiga","sensaciones":"Fuerte pero sostenible","rpe":"6"},{"semana":9,"fase":"Fase 2","fecha":"2026-05-29","dia":"Viernes","tipo":"Fuerza","duracion":35,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla 3x10, Lunges 3x10/lado, Step-up medio 3x10/lado. Core: Plancha 3x40s, Bird dog 3x10/lado, Plancha lateral 2x30s/lado. Gemelos: Excéntricos 4x12 (subir 1s / bajar 3s). RPE 5–6/10; buena técnica, sin fallo. Si hay fatiga alta del jueves, reduce 1 serie en pierna.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":9,"fase":"Fase 2","fecha":"2026-05-30","dia":"Sábado","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total. Caminata opcional 20–30 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":9,"fase":"Fase 2","fecha":"2026-05-31","dia":"Domingo","tipo":"Tirada larga","duracion":150,"zona_fc":"Z2","fc_objetivo":"140–155 bpm","terreno":"Trail progresivo","detalle":"150 min en trail o mixto. Practicar beber cada 15–20 min. Últimos 15 min muy controlados; no apretar.","objetivo":"Aumentar resistencia específica al trail","sensaciones":"Final con cansancio manejable","rpe":"6"},{"semana":10,"fase":"Fase 2","fecha":"2026-06-01","dia":"Lunes","tipo":"Fuerza","duracion":35,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla 3x10, Lunges 3x10/lado, Step-up medio 3x10/lado. Core: Plancha 3x40s, Bird dog 3x10/lado, Plancha lateral 2x30s/lado. Gemelos: Excéntricos 4x12 (subir 1s / bajar 3s). RPE 5–6/10; buena técnica, sin fallo.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":10,"fase":"Fase 2","fecha":"2026-06-02","dia":"Martes","tipo":"Carrera base","duracion":70,"zona_fc":"Z2","fc_objetivo":"140–152 bpm","terreno":"Plano / mixto","detalle":"70 min continuos en Z2. Incluir 4–6 rectas de técnica de 15 s si te notas suelto.","objetivo":"Construir motor aeróbico y economía de carrera","sensaciones":"Sostenible, sin exigencia alta","rpe":"4"},{"semana":10,"fase":"Fase 2","fecha":"2026-06-03","dia":"Miércoles","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o caminata muy suave opcional 15–20 min + movilidad 10 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":10,"fase":"Fase 2","fecha":"2026-06-04","dia":"Jueves","tipo":"Trabajo Z3 controlado","duracion":65,"zona_fc":"Z2–Z3","fc_objetivo":"160–165 bpm en bloques","terreno":"Mixto / subida suave","detalle":"15 min Z2 + 2x12 min Z3 (160–165) rec 5 min + enfriar. Z3 solo controlado; nunca a tope.","objetivo":"Elevar VT1 sin acumular demasiada fatiga","sensaciones":"Fuerte pero sostenible","rpe":"6"},{"semana":10,"fase":"Fase 2","fecha":"2026-06-05","dia":"Viernes","tipo":"Fuerza","duracion":35,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla 3x10, Lunges 3x10/lado, Step-up medio 3x10/lado. Core: Plancha 3x40s, Bird dog 3x10/lado, Plancha lateral 2x30s/lado. Gemelos: Excéntricos 4x12 (subir 1s / bajar 3s). RPE 5–6/10; buena técnica, sin fallo. Si hay fatiga alta del jueves, reduce 1 serie en pierna.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":10,"fase":"Fase 2","fecha":"2026-06-06","dia":"Sábado","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total. Caminata opcional 20–30 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":10,"fase":"Fase 2","fecha":"2026-06-07","dia":"Domingo","tipo":"Tirada larga","duracion":165,"zona_fc":"Z2","fc_objetivo":"140–155 bpm","terreno":"Trail progresivo","detalle":"165 min en trail o mixto. Practicar beber cada 15–20 min. Últimos 15 min muy controlados; no apretar.","objetivo":"Aumentar resistencia específica al trail","sensaciones":"Final con cansancio manejable","rpe":"6"},{"semana":11,"fase":"Fase 3","fecha":"2026-06-08","dia":"Lunes","tipo":"Fuerza","duracion":30,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla goblet 3x8, Step-up alto 3x10/lado, Peso muerto rumano unipodal 3x8/lado. Core/estabilidad: Plancha lateral 3x35s/lado, Pallof press 3x10/lado. Gemelos: Excéntricos 4x12. Reducir 1 serie si la fatiga del domingo sigue alta.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":11,"fase":"Fase 3","fecha":"2026-06-09","dia":"Martes","tipo":"Carrera base / recuperación","duracion":60,"zona_fc":"Z2","fc_objetivo":"138–150 bpm","terreno":"Plano / mixto fácil","detalle":"60 min suaves para absorber la tirada larga. Mantén respiración cómoda y técnica relajada.","objetivo":"Recuperar y mantener volumen aeróbico","sensaciones":"Ligero al final","rpe":"4"},{"semana":11,"fase":"Fase 3","fecha":"2026-06-10","dia":"Miércoles","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o movilidad 15 min. Si hay mucha rigidez, caminata 20 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":11,"fase":"Fase 3","fecha":"2026-06-11","dia":"Jueves","tipo":"Específico trail / Z3","duracion":70,"zona_fc":"Z2–Z3","fc_objetivo":"159–164 bpm en subidas","terreno":"Trail / subida","detalle":"15 min Z2 + 3x10 min Z3 en subida / rec bajando o caminando 5 min + enfriar. Practicar bastones si los usarás en carrera.","objetivo":"Desarrollar fuerza-resistencia en montaña","sensaciones":"Exigente pero bajo control","rpe":"6"},{"semana":11,"fase":"Fase 3","fecha":"2026-06-12","dia":"Viernes","tipo":"Fuerza","duracion":30,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla goblet 3x8, Step-up alto 3x10/lado, Peso muerto rumano unipodal 3x8/lado. Core/estabilidad: Plancha lateral 3x35s/lado, Pallof press 3x10/lado. Gemelos: Excéntricos 4x12. Mantener calidad; nunca terminar destruido.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":11,"fase":"Fase 3","fecha":"2026-06-13","dia":"Sábado","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso. Preparar nutrición, sodio y equipo para la tirada larga.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":11,"fase":"Fase 3","fecha":"2026-06-14","dia":"Domingo","tipo":"Tirada larga específica ultra","duracion":180,"zona_fc":"Z2","fc_objetivo":"140–155 bpm","terreno":"Trail real","detalle":"180 min en montaña/trail. Comer 40–70 g CHO/h según tolerancia y 500–700 mg sodio/h. Usar equipo, hidratación y ritmo de carrera.","objetivo":"Convertir la base en resistencia de ultra","sensaciones":"Fatiga alta pero controlada; foco en constancia","rpe":"7"},{"semana":12,"fase":"Fase 3","fecha":"2026-06-15","dia":"Lunes","tipo":"Fuerza","duracion":30,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla goblet 3x8, Step-up alto 3x10/lado, Peso muerto rumano unipodal 3x8/lado. Core/estabilidad: Plancha lateral 3x35s/lado, Pallof press 3x10/lado. Gemelos: Excéntricos 4x12.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":12,"fase":"Fase 3","fecha":"2026-06-16","dia":"Martes","tipo":"Carrera base / recuperación","duracion":60,"zona_fc":"Z2","fc_objetivo":"138–150 bpm","terreno":"Plano / mixto fácil","detalle":"60 min suaves. Mantén respiración cómoda y técnica relajada.","objetivo":"Recuperar y mantener volumen aeróbico","sensaciones":"Ligero al final","rpe":"4"},{"semana":12,"fase":"Fase 3","fecha":"2026-06-17","dia":"Miércoles","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o movilidad 15 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":12,"fase":"Fase 3","fecha":"2026-06-18","dia":"Jueves","tipo":"Específico trail / Z3","duracion":75,"zona_fc":"Z2–Z3","fc_objetivo":"159–164 bpm en subidas","terreno":"Trail / subida","detalle":"15 min Z2 + 4x8 min Z3 en subida / rec 4–5 min + enfriar. Practicar bastones si los usarás en carrera.","objetivo":"Desarrollar fuerza-resistencia en montaña","sensaciones":"Exigente pero bajo control","rpe":"6"},{"semana":12,"fase":"Fase 3","fecha":"2026-06-19","dia":"Viernes","tipo":"Fuerza","duracion":30,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla goblet 3x8, Step-up alto 3x10/lado, Peso muerto rumano unipodal 3x8/lado. Core/estabilidad: Plancha lateral 3x35s/lado, Pallof press 3x10/lado. Gemelos: Excéntricos 4x12.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":12,"fase":"Fase 3","fecha":"2026-06-20","dia":"Sábado","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso. Preparar nutrición, sodio y equipo para la tirada larga.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":12,"fase":"Fase 3","fecha":"2026-06-21","dia":"Domingo","tipo":"Tirada larga específica ultra","duracion":210,"zona_fc":"Z2","fc_objetivo":"140–155 bpm","terreno":"Trail real","detalle":"210 min en montaña/trail. Comer 40–70 g CHO/h y 500–700 mg sodio/h. Usar equipo, hidratación y ritmo de carrera.","objetivo":"Convertir la base en resistencia de ultra","sensaciones":"Fatiga alta pero controlada; foco en constancia","rpe":"7"},{"semana":13,"fase":"Fase 3","fecha":"2026-06-22","dia":"Lunes","tipo":"Fuerza","duracion":30,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla goblet 3x8, Step-up alto 3x10/lado, Peso muerto rumano unipodal 3x8/lado. Core/estabilidad: Plancha lateral 3x35s/lado, Pallof press 3x10/lado. Gemelos: Excéntricos 4x12.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":13,"fase":"Fase 3","fecha":"2026-06-23","dia":"Martes","tipo":"Carrera base / recuperación","duracion":65,"zona_fc":"Z2","fc_objetivo":"138–150 bpm","terreno":"Plano / mixto fácil","detalle":"65 min suaves. Mantén respiración cómoda y técnica relajada.","objetivo":"Recuperar y mantener volumen aeróbico","sensaciones":"Ligero al final","rpe":"4"},{"semana":13,"fase":"Fase 3","fecha":"2026-06-24","dia":"Miércoles","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o movilidad 15 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":13,"fase":"Fase 3","fecha":"2026-06-25","dia":"Jueves","tipo":"Específico trail / Z3","duracion":80,"zona_fc":"Z2–Z3","fc_objetivo":"159–165 bpm","terreno":"Trail / subida","detalle":"15 min Z2 + 2x15 min Z3 sostenido en trail / rec 6 min + enfriar. Practicar bastones si los usarás en carrera.","objetivo":"Desarrollar fuerza-resistencia en montaña","sensaciones":"Exigente pero bajo control","rpe":"6"},{"semana":13,"fase":"Fase 3","fecha":"2026-06-26","dia":"Viernes","tipo":"Fuerza","duracion":30,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla goblet 3x8, Step-up alto 3x10/lado, Peso muerto rumano unipodal 3x8/lado. Core: Plancha lateral 3x35s/lado, Pallof press 3x10/lado. Gemelos: Excéntricos 4x12.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":13,"fase":"Fase 3","fecha":"2026-06-27","dia":"Sábado","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso. Preparar nutrición, sodio y equipo para la tirada larga.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":13,"fase":"Fase 3","fecha":"2026-06-28","dia":"Domingo","tipo":"Tirada larga específica ultra","duracion":240,"zona_fc":"Z2","fc_objetivo":"140–155 bpm","terreno":"Trail real","detalle":"240 min en montaña/trail. Comer 40–70 g CHO/h y 500–700 mg sodio/h. Usar equipo, hidratación y ritmo de carrera.","objetivo":"Convertir la base en resistencia de ultra","sensaciones":"Fatiga alta pero controlada; foco en constancia","rpe":"7"},{"semana":14,"fase":"Fase 3","fecha":"2026-06-29","dia":"Lunes","tipo":"Fuerza","duracion":30,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla goblet 3x8, Step-up alto 3x10/lado, Peso muerto rumano unipodal 3x8/lado. Core: Plancha lateral 3x35s/lado, Pallof press 3x10/lado. Gemelos: Excéntricos 4x12.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":14,"fase":"Fase 3","fecha":"2026-06-30","dia":"Martes","tipo":"Carrera base / recuperación","duracion":50,"zona_fc":"Z2","fc_objetivo":"138–150 bpm","terreno":"Plano / mixto fácil","detalle":"50 min suaves. Mantén respiración cómoda y técnica relajada.","objetivo":"Recuperar y mantener volumen aeróbico","sensaciones":"Ligero al final","rpe":"3"},{"semana":14,"fase":"Fase 3","fecha":"2026-07-01","dia":"Miércoles","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o movilidad 15 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":14,"fase":"Fase 3","fecha":"2026-07-02","dia":"Jueves","tipo":"Específico trail / Z3","duracion":60,"zona_fc":"Z2–Z3","fc_objetivo":"140–152 bpm","terreno":"Trail / subida","detalle":"Descarga: 60 min Z2 sin Z3; 6 x 20 s técnica al final si te notas bien. Practicar bastones.","objetivo":"Desarrollar fuerza-resistencia en montaña","sensaciones":"Exigente pero bajo control","rpe":"5"},{"semana":14,"fase":"Fase 3","fecha":"2026-07-03","dia":"Viernes","tipo":"Fuerza","duracion":30,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla goblet 3x8, Step-up alto 3x10/lado, Peso muerto rumano unipodal 3x8/lado. Core: Plancha lateral 3x35s/lado, Pallof press 3x10/lado. Gemelos: Excéntricos 4x12.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":14,"fase":"Fase 3","fecha":"2026-07-04","dia":"Sábado","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso. Preparar nutrición, sodio y equipo para la tirada larga.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":14,"fase":"Fase 3","fecha":"2026-07-05","dia":"Domingo","tipo":"Tirada larga específica ultra","duracion":180,"zona_fc":"Z2","fc_objetivo":"140–155 bpm","terreno":"Trail real","detalle":"180 min en montaña/trail. Comer 40–70 g CHO/h y 500–700 mg sodio/h. Semana de descarga: quitar desnivel excesivo.","objetivo":"Convertir la base en resistencia de ultra","sensaciones":"Fatiga alta pero controlada; foco en constancia","rpe":"5"},{"semana":15,"fase":"Fase 3","fecha":"2026-07-06","dia":"Lunes","tipo":"Fuerza","duracion":30,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla goblet 3x8, Step-up alto 3x10/lado, Peso muerto rumano unipodal 3x8/lado. Core: Plancha lateral 3x35s/lado, Pallof press 3x10/lado. Gemelos: Excéntricos 4x12.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":15,"fase":"Fase 3","fecha":"2026-07-07","dia":"Martes","tipo":"Carrera base / recuperación","duracion":65,"zona_fc":"Z2","fc_objetivo":"138–150 bpm","terreno":"Plano / mixto fácil","detalle":"65 min suaves. Mantén respiración cómoda y técnica relajada.","objetivo":"Recuperar y mantener volumen aeróbico","sensaciones":"Ligero al final","rpe":"4"},{"semana":15,"fase":"Fase 3","fecha":"2026-07-08","dia":"Miércoles","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o movilidad 15 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":15,"fase":"Fase 3","fecha":"2026-07-09","dia":"Jueves","tipo":"Específico trail / Z3","duracion":85,"zona_fc":"Z2–Z3","fc_objetivo":"160–165 bpm","terreno":"Trail / subida","detalle":"15 min Z2 + 3x15 min Z3 en subida larga / rec 5–6 min + enfriar. Practicar bastones.","objetivo":"Desarrollar fuerza-resistencia en montaña","sensaciones":"Exigente pero bajo control","rpe":"6"},{"semana":15,"fase":"Fase 3","fecha":"2026-07-10","dia":"Viernes","tipo":"Fuerza","duracion":30,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla goblet 3x8, Step-up alto 3x10/lado, Peso muerto rumano unipodal 3x8/lado. Core: Plancha lateral 3x35s/lado, Pallof press 3x10/lado. Gemelos: Excéntricos 4x12.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":15,"fase":"Fase 3","fecha":"2026-07-11","dia":"Sábado","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso. Preparar nutrición, sodio y equipo para la tirada larga.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":15,"fase":"Fase 3","fecha":"2026-07-12","dia":"Domingo","tipo":"Tirada larga específica ultra","duracion":270,"zona_fc":"Z2","fc_objetivo":"140–155 bpm","terreno":"Trail real","detalle":"270 min en montaña/trail. Comer 40–70 g CHO/h y 500–700 mg sodio/h. Usar equipo, hidratación y ritmo de carrera.","objetivo":"Convertir la base en resistencia de ultra","sensaciones":"Fatiga alta pero controlada; foco en constancia","rpe":"7"},{"semana":16,"fase":"Fase 3","fecha":"2026-07-13","dia":"Lunes","tipo":"Fuerza","duracion":30,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla goblet 3x8, Step-up alto 3x10/lado, Peso muerto rumano unipodal 3x8/lado. Core: Plancha lateral 3x35s/lado, Pallof press 3x10/lado. Gemelos: Excéntricos 4x12.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":16,"fase":"Fase 3","fecha":"2026-07-14","dia":"Martes","tipo":"Carrera base / recuperación","duracion":60,"zona_fc":"Z2","fc_objetivo":"138–150 bpm","terreno":"Plano / mixto fácil","detalle":"60 min suaves. Mantén respiración cómoda y técnica relajada.","objetivo":"Recuperar y mantener volumen aeróbico","sensaciones":"Ligero al final","rpe":"4"},{"semana":16,"fase":"Fase 3","fecha":"2026-07-15","dia":"Miércoles","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o movilidad 15 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":16,"fase":"Fase 3","fecha":"2026-07-16","dia":"Jueves","tipo":"Específico trail / Z3","duracion":75,"zona_fc":"Z2–Z3","fc_objetivo":"160–165 bpm","terreno":"Trail / subida","detalle":"15 min Z2 + 20 min Z3 continuo + 4 x 2 min Z3 en subida / rec 3 min + enfriar. Practicar bastones.","objetivo":"Desarrollar fuerza-resistencia en montaña","sensaciones":"Exigente pero bajo control","rpe":"6"},{"semana":16,"fase":"Fase 3","fecha":"2026-07-17","dia":"Viernes","tipo":"Fuerza","duracion":30,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Piernas: Sentadilla goblet 3x8, Step-up alto 3x10/lado, Peso muerto rumano unipodal 3x8/lado. Core: Plancha lateral 3x35s/lado, Pallof press 3x10/lado. Gemelos: Excéntricos 4x12.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":16,"fase":"Fase 3","fecha":"2026-07-18","dia":"Sábado","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso. Preparar nutrición, sodio y equipo para la tirada larga.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":16,"fase":"Fase 3","fecha":"2026-07-19","dia":"Domingo","tipo":"Tirada larga específica ultra","duracion":300,"zona_fc":"Z2","fc_objetivo":"140–155 bpm","terreno":"Trail real","detalle":"300 min en montaña/trail. Comer 40–70 g CHO/h y 500–700 mg sodio/h. Usar equipo, hidratación y ritmo de carrera.","objetivo":"Convertir la base en resistencia de ultra","sensaciones":"Fatiga alta pero controlada; foco en constancia","rpe":"7"},{"semana":17,"fase":"Fase 4","fecha":"2026-07-20","dia":"Lunes","tipo":"Fuerza","duracion":20,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Activación sin fatiga: Puente de glúteo 2x10, Sentadilla 2x8, Step-up 2x8/lado, Plancha 2x25s, Gemelos 2x12. Todo controlado. RPE 3–4/10.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":17,"fase":"Fase 4","fecha":"2026-07-21","dia":"Martes","tipo":"Carrera base + activación","duracion":50,"zona_fc":"Z2–Z3","fc_objetivo":"140–164 bpm","terreno":"Plano / fácil","detalle":"35 min Z2 + 3x3 min Z3 con 3 min suaves + enfriar. Todo con sensación de control.","objetivo":"Mantener activación sin acumular fatiga","sensaciones":"Ligero y con chispa","rpe":"4"},{"semana":17,"fase":"Fase 4","fecha":"2026-07-22","dia":"Miércoles","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o caminata muy suave opcional 15–20 min + movilidad 10 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":17,"fase":"Fase 4","fecha":"2026-07-23","dia":"Jueves","tipo":"Z3 controlado","duracion":45,"zona_fc":"Z2–Z3","fc_objetivo":"145–164 bpm","terreno":"Mixto suave","detalle":"15 min Z2 + 3x8 min Z3 con 4 min suaves + enfriar. No pasar a sensación de carrera.","objetivo":"Preservar umbral y ritmo interno","sensaciones":"Activado, no cansado","rpe":"5"},{"semana":17,"fase":"Fase 4","fecha":"2026-07-24","dia":"Viernes","tipo":"Fuerza","duracion":20,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Activación sin fatiga: Puente de glúteo 2x10, Sentadilla 2x8, Step-up 2x8/lado, Plancha 2x25s, Gemelos 2x12. Todo controlado. RPE 3–4/10.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":17,"fase":"Fase 4","fecha":"2026-07-25","dia":"Sábado","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o caminata muy suave opcional 15–20 min + movilidad 10 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":17,"fase":"Fase 4","fecha":"2026-07-26","dia":"Domingo","tipo":"Última tirada larga controlada","duracion":210,"zona_fc":"Z2","fc_objetivo":"140–152 bpm","terreno":"Trail / mixto","detalle":"3h30 en Z2 cómoda. Último test completo de nutrición y material. Sin apretar.","objetivo":"Consolidar confianza antes del taper final","sensaciones":"Terminar con la sensación de poder seguir","rpe":"5"},{"semana":18,"fase":"Fase 4","fecha":"2026-07-27","dia":"Lunes","tipo":"Fuerza","duracion":20,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Activación sin fatiga: Puente de glúteo 2x10, Sentadilla 2x8, Step-up 2x8/lado, Plancha 2x25s, Gemelos 2x12. Todo controlado. RPE 3–4/10.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":18,"fase":"Fase 4","fecha":"2026-07-28","dia":"Martes","tipo":"Carrera base + activación","duracion":40,"zona_fc":"Z2–Z3","fc_objetivo":"140–162 bpm","terreno":"Plano","detalle":"25 min Z2 + 2x5 min Z3 con 4 min suaves + enfriar.","objetivo":"Mantener la chispa mientras baja el volumen","sensaciones":"Ligero","rpe":"4"},{"semana":18,"fase":"Fase 4","fecha":"2026-07-29","dia":"Miércoles","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total o caminata muy suave opcional 15–20 min + movilidad 10 min.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":18,"fase":"Fase 4","fecha":"2026-07-30","dia":"Jueves","tipo":"Carrera base","duracion":35,"zona_fc":"Z2","fc_objetivo":"140–150 bpm","terreno":"Plano / fácil","detalle":"35 min continuos muy controlados. Cerrar con 3 progresivos de 15 s si te sientes bien.","objetivo":"Mantener soltura y frescura","sensaciones":"Muy cómodo","rpe":"3"},{"semana":18,"fase":"Fase 4","fecha":"2026-07-31","dia":"Viernes","tipo":"Fuerza","duracion":20,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Activación sin fatiga: Puente de glúteo 2x10, Sentadilla 2x8, Step-up 2x8/lado, Plancha 2x25s, Gemelos 2x12. Todo controlado. RPE 3–4/10.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":18,"fase":"Fase 4","fecha":"2026-08-01","dia":"Sábado","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total. Prioriza sueño y alimentación.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":18,"fase":"Fase 4","fecha":"2026-08-02","dia":"Domingo","tipo":"Tirada media taper","duracion":120,"zona_fc":"Z2","fc_objetivo":"138–150 bpm","terreno":"Mixto fácil","detalle":"2 h en terreno cómodo. Beber y comer como ensayo, pero sin forzar.","objetivo":"Bajar fatiga sin perder sensaciones","sensaciones":"Muy controlado","rpe":"4"},{"semana":19,"fase":"Fase 4","fecha":"2026-08-03","dia":"Lunes","tipo":"Fuerza","duracion":20,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Activación sin fatiga: Puente de glúteo 2x10, Sentadilla 2x8, Step-up 2x8/lado, Plancha 2x25s, Gemelos 2x12. Todo controlado. RPE 3–4/10.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":19,"fase":"Fase 4","fecha":"2026-08-04","dia":"Martes","tipo":"Carrera muy suave","duracion":30,"zona_fc":"Z1–Z2","fc_objetivo":"110–145 bpm","terreno":"Plano","detalle":"25–30 min muy suaves + 3 progresivos de 15 s. Solo para activar.","objetivo":"Llegar fresco y coordinado","sensaciones":"Muy fácil","rpe":"2"},{"semana":19,"fase":"Fase 4","fecha":"2026-08-05","dia":"Miércoles","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total. Hidratación, sueño y logística.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":19,"fase":"Fase 4","fecha":"2026-08-06","dia":"Jueves","tipo":"Carrera muy suave","duracion":25,"zona_fc":"Z1–Z2","fc_objetivo":"110–140 bpm","terreno":"Plano","detalle":"20–25 min muy suaves. Si la carrera es sábado, esta sesión se hace jueves y viernes descanso total.","objetivo":"Mover piernas sin fatiga","sensaciones":"Muy fresco","rpe":"2"},{"semana":19,"fase":"Fase 4","fecha":"2026-08-07","dia":"Viernes","tipo":"Fuerza","duracion":20,"zona_fc":"-","fc_objetivo":"-","terreno":"Indoor / gimnasio / casa","detalle":"Activación sin fatiga: Puente de glúteo 2x10, Sentadilla 2x8, Step-up 2x8/lado, Plancha 2x25s, Gemelos 2x12. Opcional. Si notas cualquier fatiga, reemplazar por movilidad.","objetivo":"Fortalecer y prevenir lesiones","sensaciones":"Activado, sin fatiga residual","rpe":"4–6"},{"semana":19,"fase":"Fase 4","fecha":"2026-08-08","dia":"Sábado","tipo":"Recuperación","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"-","detalle":"Descanso total. Preparación mental y material.","objetivo":"Asimilar carga y favorecer recuperación","sensaciones":"Frescura y piernas sueltas","rpe":"1"},{"semana":19,"fase":"Fase 4","fecha":"2026-08-09","dia":"Domingo","tipo":"Carrera objetivo 105K / o descanso","duracion":0,"zona_fc":"-","fc_objetivo":"-","terreno":"Competencia","detalle":"Si la carrera es este fin de semana, usar este espacio como CARRERA OBJETIVO. Si no, descanso o trote 20 min de activación el día previo a la carrera real.","objetivo":"Rendir en tu objetivo principal","sensaciones":"Enfocado y fresco","rpe":"10"}];
+
+const RACE_DATE = new Date('2026-08-09');
+const FUERZA_DATA = [
+  {fase:'Fase 1',ejercicios:[
+    {nombre:'Puente de glúteo',series:'2×12',icono:'🍑',nota:'Pausa 2 s arriba; activar glúteos, no la espalda. Pies a la altura de caderas.',prog:'Base de activación pélvica'},
+    {nombre:'Bird dog',series:'2×10/lado',icono:'🦅',nota:'Movimiento lento, pelvis estable. No rotar cadera. Extender brazo y pierna contrarios.',prog:'Estabilidad lumbar y coordinación'},
+    {nombre:'Plancha frontal',series:'2×30 seg',icono:'💪',nota:'Abdomen firme, sin colapsar lumbar. Cabeza alineada. No elevar caderas.',prog:'Core antiflexión'},
+    {nombre:'Sentadilla',series:'2×10',icono:'🦵',nota:'Peso corporal, técnica perfecta. Rodillas siguen los pies. Bajar hasta 90°.',prog:'Fuerza funcional básica'},
+    {nombre:'Lunges',series:'2×8/lado',icono:'🏃',nota:'Paso controlado, rodilla alineada. No tocar el suelo con la rodilla trasera.',prog:'Estabilidad unipodal'},
+    {nombre:'Step-up bajo',series:'2×10/lado',icono:'⬆️',nota:'Subir con el pie completo. No impulsar con pierna de abajo. Escalón 15–20 cm.',prog:'Fuerza específica trail'},
+    {nombre:'Gemelos (talón)',series:'3×12',icono:'👟',nota:'Bajada lenta 3 segundos. Rango completo. Controlar excéntrica.',prog:'Tendón aquíleo + pantorrilla'},
+  ]},
+  {fase:'Fase 2',ejercicios:[
+    {nombre:'Sentadilla',series:'3×10',icono:'🦵',nota:'Añadir carga ligera (mochila 5 kg) o goblet con peso. Técnica impecable.',prog:'Aumentar carga funcional'},
+    {nombre:'Lunges caminando',series:'3×10/lado',icono:'🏃',nota:'En pendiente. Paso más largo. Transferencia al trail.',prog:'Transferencia a desnivel'},
+    {nombre:'Step-up medio',series:'3×10/lado',icono:'⬆️',nota:'Escalón 30 cm. Subida explosiva, bajada lenta (3 s).',prog:'Potencia y excéntrica'},
+    {nombre:'Plancha + lateral',series:'3×40s + 2×30s',icono:'💪',nota:'Core anti-rotación. Añadir variante lateral 2×30 s/lado.',prog:'Core complejo'},
+    {nombre:'Bird dog cargado',series:'3×10/lado',icono:'🦅',nota:'Añadir pequeño peso en muñeca o tobillo (0.5–1 kg).',prog:'Progresión de carga'},
+    {nombre:'Gemelos excéntricos',series:'4×12',icono:'👟',nota:'Subir 1 s — bajar 3 s. En escalón para rango completo. Prioridad en bajada.',prog:'Prevención tendinopatía aquílea'},
+    {nombre:'Plancha lateral',series:'2×30 s/lado',icono:'🏋️',nota:'Cadera elevada. Apretar glúteo. Opción: elevación de cadera.',prog:'Estabilidad lateral cadera'},
+  ]},
+  {fase:'Fase 3',ejercicios:[
+    {nombre:'Sentadilla goblet',series:'3×8',icono:'🏋️',nota:'Con kettlebell o peso libre. Profundidad completa. Torso vertical.',prog:'Fuerza específica ultra'},
+    {nombre:'Step-up alto',series:'3×10/lado',icono:'⬆️',nota:'Escalón 40 cm. Movimiento controlado. Énfasis en bajada lenta (4 s).',prog:'Excéntrica ultra-específica'},
+    {nombre:'Peso muerto rumano unipodal',series:'3×8/lado',icono:'⚖️',nota:'Bisagra de cadera con pierna extendida atrás. Espalda neutra. Usar bastón si es necesario.',prog:'Cadena posterior unipodal'},
+    {nombre:'Plancha lateral dinámica',series:'3×35 s/lado',icono:'💪',nota:'Añadir elevación de cadera rítmica. 10 repeticiones + mantener.',prog:'Core funcional dinámico'},
+    {nombre:'Pallof press',series:'3×10/lado',icono:'🎯',nota:'Con banda o polea. Resistir rotación. Lento y controlado.',prog:'Anti-rotación core'},
+    {nombre:'Gemelos excéntricos',series:'4×12',icono:'👟',nota:'Igual que F2 pero aumentar carga (mochila ligera). Prioridad en bajada.',prog:'Máxima protección tendones'},
+  ]},
+  {fase:'Fase 4',ejercicios:[
+    {nombre:'Puente de glúteo',series:'2×10',icono:'🍑',nota:'Activación suave. RPE 3–4. Sin buscar fatiga.',prog:'Activar sin fatigar'},
+    {nombre:'Sentadilla',series:'2×8',icono:'🦵',nota:'Peso corporal. Técnica. No añadir carga.',prog:'Mantener patrón motor'},
+    {nombre:'Step-up',series:'2×8/lado',icono:'⬆️',nota:'Escalón medio. Bajada controlada.',prog:'Recordatorio neuromuscular'},
+    {nombre:'Plancha',series:'2×25 seg',icono:'💪',nota:'Solo activación. No llegar al límite.',prog:'Tono sin carga'},
+    {nombre:'Gemelos',series:'2×12',icono:'👟',nota:'Sin excéntrica pesada. Suave y fluido.',prog:'Mantenimiento tendinoso'},
+  ]},
+];
+
+const NUTRICION_DATA = [
+  {bloque:'0–2h (Inicio)',km:'0–20 km',cho:'30–40',sodio:'300–500',hidra:'400–500',fuente:'Gel cada 45 min + bebida isotónica',senal:'Cada 30–45 min aunque no tengas hambre',alerta:'Clave establecer el patrón desde el inicio',alertaClass:'ok'},
+  {bloque:'2–4h (Construcción)',km:'20–40 km',cho:'40–55',sodio:'400–600',hidra:'500–600',fuente:'Gel + barrita semisólida + electrolitos',senal:'Cada 20–30 min. Alternar sólidos y geles',alerta:'Evitar solo geles: riesgo de intolerancia digestiva',alertaClass:'warn'},
+  {bloque:'4–6h (Pico metabólico)',km:'40–60 km',cho:'50–70',sodio:'500–700',hidra:'500–700',fuente:'Comida real: plátano, patata cocida + sal, frutos secos, caldo',senal:'Cada 20 min. Prioriza sólidos en avituallamientos',alerta:'⚠️ Comer aunque no tengas ganas. Llegará el bajón si no',alertaClass:'bad'},
+  {bloque:'6–8h (Resistencia tardía)',km:'60–80 km',cho:'40–60',sodio:'500–700',hidra:'400–600',fuente:'Caldo caliente + fruta fresca + gel si hay bajón',senal:'Escuchar al cuerpo + reloj. Mín. cada 25 min',alerta:'Náuseas frecuentes: reducir CHO, aumentar sodio',alertaClass:'warn'},
+  {bloque:'8–10h (Cierre)',km:'80–100 km',cho:'30–50',sodio:'400–600',hidra:'300–500',fuente:'Lo que toleres: caldo, fruta, geles si el estómago aguanta',senal:'Forzar ingesta aunque el cuerpo rechace. Dosis pequeñas y frecuentes',alerta:'⚠️ No parar de comer. Cada 15–20 min aunque sea poco',alertaClass:'bad'},
+  {bloque:'10h+ (Final)',km:'100–105 km',cho:'20–40',sodio:'300–500',hidra:'200–400',fuente:'Caldo + glucosa directa si hay hipoglucemia. Cola/Coca-Cola',senal:'Cada 15 min',alerta:'Orina oscura = deshidratado → aumentar líquido',alertaClass:'warn'},
+];
+
+// ═══════════════════════════════════════════════════════════════
+// STATE — local + cloud sync
+// ═══════════════════════════════════════════════════════════════
+let state = {};
+let cloudProfileKey = null;
+let isSyncing = false;
+let pendingSync = false;
+const STORAGE_VERSION = 'v3';
+const ORIGINAL_START_STR = '2026-03-30';
+
+function loadLocalState(){
+  try {
+    const raw = localStorage.getItem('ultra105k_'+STORAGE_VERSION);
+    if(raw) state = JSON.parse(raw);
+  } catch(e){ state = {}; }
+  if(!state.logs) state.logs = {};
+  if(!state.fatigue) state.fatigue = {};
+  if(!state.rpe) state.rpe = {};
+  if(!state.durReal) state.durReal = {};
+  if(!state.logWeek) state.logWeek = 1;
+  if(!state.startDate) state.startDate = ORIGINAL_START_STR;
+  cloudProfileKey = localStorage.getItem('ultra105k_cloudkey') || null;
+}
+
+function saveLocalState(){
+  try { localStorage.setItem('ultra105k_'+STORAGE_VERSION, JSON.stringify(state)); } catch(e){}
+}
+
+async function pushToCloud(){
+  if(!cloudProfileKey || isSyncing) return;
+  isSyncing = true;
+  setSyncStatus('syncing','Guardando en la nube...');
+  try {
+    const payload = JSON.stringify({...state, _ts: Date.now()});
+    const result = await window.storage.set(cloudProfileKey, payload, true);
+    if(result) setSyncStatus('connected','✓ Guardado · '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}));
+    else setSyncStatus('error','Error al guardar');
+  } catch(e){ setSyncStatus('error','Sin conexión'); }
+  isSyncing = false;
+  if(pendingSync){ pendingSync=false; pushToCloud(); }
+}
+
+async function pullFromCloud(profileKey){
+  setSyncStatus('syncing','Cargando datos...');
+  try {
+    const result = await window.storage.get(profileKey, true);
+    if(result && result.value){
+      const remote = JSON.parse(result.value);
+      const localTs = state._ts || 0;
+      const remoteTs = remote._ts || 1;
+      if(remoteTs >= localTs || !state._ts){
+        const {_ts,...cleanRemote} = remote;
+        state = {...state, ...cleanRemote};
+        if(!state.logs) state.logs={};
+        if(!state.fatigue) state.fatigue={};
+        if(!state.rpe) state.rpe={};
+        if(!state.durReal) state.durReal={};
+        if(!state.logWeek) state.logWeek=1;
+        if(!state.startDate) state.startDate=ORIGINAL_START_STR;
+        saveLocalState();
+        return true;
+      }
+    }
+  } catch(e){}
+  return false;
+}
+
+let saveTimer = null;
+function saveState(){
+  saveLocalState();
+  clearTimeout(saveTimer);
+  if(cloudProfileKey){
+    if(isSyncing){ pendingSync=true; return; }
+    saveTimer = setTimeout(pushToCloud, 1800);
+  }
+}
+
+function generateCode(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code='';
+  for(let i=0;i<6;i++) code+=chars[Math.floor(Math.random()*chars.length)];
+  return code;
+}
+
+async function createNewProfile(){
+  const code = generateCode();
+  cloudProfileKey = 'u105k:'+code;
+  localStorage.setItem('ultra105k_cloudkey', cloudProfileKey);
+  await pushToCloud();
+  renderConfigSync();
+  showToast('✅ Perfil creado: '+code);
+}
+
+async function loadProfile(){
+  const raw = (document.getElementById('syncCodeInput').value||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(raw.length < 4){ showToast('⚠️ Código inválido'); return; }
+  const key = 'u105k:'+raw;
+  setSyncStatus('syncing','Conectando...');
+  const ok = await pullFromCloud(key);
+  cloudProfileKey = key;
+  localStorage.setItem('ultra105k_cloudkey', key);
+  renderAll();
+  renderConfigSync();
+  if(ok) showToast('✅ Datos cargados correctamente');
+  else{ await pushToCloud(); showToast('🆕 Perfil creado con código '+raw); }
+}
+
+async function forcePush(){
+  if(!cloudProfileKey) return;
+  state._ts = Date.now();
+  saveLocalState();
+  await pushToCloud();
+  showToast('📤 Datos subidos a la nube');
+}
+
+async function forcePull(){
+  if(!cloudProfileKey) return;
+  const ok = await pullFromCloud(cloudProfileKey);
+  if(ok){ renderAll(); showToast('📥 Datos descargados'); }
+  else showToast('⚠️ No se encontraron datos remotos');
+}
+
+function disconnectProfile(){
+  if(!confirm('¿Desconectar este dispositivo del perfil en la nube?')) return;
+  cloudProfileKey = null;
+  localStorage.removeItem('ultra105k_cloudkey');
+  renderConfigSync();
+  showToast('Desconectado de la nube');
+}
+
+function setSyncStatus(status, label){
+  const dot=document.getElementById('syncDot');
+  const lbl=document.getElementById('syncLabel');
+  const last=document.getElementById('syncLast');
+  if(!dot) return;
+  dot.className='sync-dot '+status;
+  lbl.textContent=label;
+  if(status==='connected') last.textContent='Última sync: '+new Date().toLocaleString('es',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'});
+}
+
+function renderConfigSync(){
+  const setup=document.getElementById('syncSetup');
+  const connected=document.getElementById('syncConnectedBlock');
+  if(!setup) return;
+  if(cloudProfileKey){
+    const code=cloudProfileKey.replace('u105k:','').toUpperCase();
+    document.getElementById('syncCodeDisplay').textContent=code;
+    setup.style.display='none';
+    connected.style.display='block';
+    setSyncStatus('connected','Conectado · Cód. '+code);
+  } else {
+    setup.style.display='block';
+    connected.style.display='none';
+    setSyncStatus('offline','Sin perfil en la nube');
+  }
+}
+
+function copyCode(){
+  if(!cloudProfileKey) return;
+  const code=cloudProfileKey.replace('u105k:','').toUpperCase();
+  navigator.clipboard?.writeText(code).then(()=>showToast('📋 Código copiado: '+code))
+    .catch(()=>showToast('Código: '+code));
+}
+
+// ── Start date ──────────────────────────────────────────────────
+function getStartDate(){ return state.startDate || ORIGINAL_START_STR; }
+
+function previewStartDate(){
+  const inp=document.getElementById('startDateInput');
+  const warn=document.getElementById('startDateWarn');
+  if(inp && inp.value && inp.value !== getStartDate()){
+    if(warn) warn.style.display='block';
+  } else {
+    if(warn) warn.style.display='none';
+  }
+  updateStartDateInfo();
+}
+
+function applyStartDate(){
+  const input=document.getElementById('startDateInput');
+  if(!input||!input.value){ showToast('⚠️ Selecciona una fecha'); return; }
+  const prev=getStartDate();
+  state.startDate=input.value;
+  saveState();
+  updateStartDateInfo();
+  const warn=document.getElementById('startDateWarn');
+  if(warn) warn.style.display='none';
+  renderAll();
+  showToast('📅 Fecha actualizada: '+new Date(input.value).toLocaleDateString('es',{day:'2-digit',month:'long',year:'numeric'}));
+}
+
+function updateStartDateInfo(){
+  const info=document.getElementById('startDateInfo');
+  if(!info) return;
+  const inp=document.getElementById('startDateInput');
+  const previewDate=inp?.value || getStartDate();
+  const sd=new Date(previewDate);
+  const endDate=new Date(sd);
+  endDate.setDate(endDate.getDate()+19*7-1);
+  const curWeek=getCurrentWeek();
+  const fmtOpts={day:'2-digit',month:'short',year:'numeric'};
+  const fmt=d=>d.toLocaleDateString('es',fmtOpts);
+  info.innerHTML=`
+    <div class="config-info-row"><span class="config-info-key">Inicio semana 1</span><span class="config-info-val">${fmt(sd)}</span></div>
+    <div class="config-info-row"><span class="config-info-key">Fin semana 19</span><span class="config-info-val">${fmt(endDate)}</span></div>
+    <div class="config-info-row"><span class="config-info-key">Semana actual</span><span class="config-info-val">${curWeek} / 19</span></div>
+  `;
+  if(inp && !inp.value) inp.value=getStartDate();
+}
+
+// ── Dynamic plan dates ──────────────────────────────────────────
+const PLAN_DATA_BASE = PLAN_DATA.map(s=>({...s}));
+
+function getActivePlan(){
+  const origStart=new Date(ORIGINAL_START_STR);
+  const newStart=new Date(getStartDate());
+  const diffDays=Math.round((newStart-origStart)/(24*60*60*1000));
+  if(diffDays===0) return PLAN_DATA_BASE;
+  return PLAN_DATA_BASE.map(s=>{
+    const d=new Date(s.fecha);
+    d.setDate(d.getDate()+diffDays);
+    return {...s, fecha:d.toISOString().slice(0,10)};
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+function today(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function sessionKey(s){ return `${s.semana}-${s.fecha}-${s.dia}`; }
+
+function getCurrentWeek(){
+  const t=new Date(today());
+  const start=new Date(getStartDate());
+  if(t<start) return 1;
+  const diff=Math.floor((t-start)/(7*24*60*60*1000));
+  return Math.min(Math.max(1,diff+1),19);
+}
+
+function getWeekSessions(week){ return getActivePlan().filter(s=>s.semana===week); }
+function getLongRun(week){ return getWeekSessions(week).filter(s=>s.tipo.toLowerCase().includes('tirada')).map(s=>s.duracion).reduce((a,b)=>Math.max(a,b),0); }
+
+function calcWeekLoad(week){
+  let load=0;
+  getWeekSessions(week).forEach(s=>{
+    const key=sessionKey(s);
+    const rpe=parseFloat(state.rpe[key])||0;
+    const dur=parseFloat(state.durReal[key])||0;
+    if(rpe>0&&dur>0) load+=rpe*dur;
+  });
+  return load;
+}
+
+function getCompletedCount(week){
+  return getWeekSessions(week).filter(s=>state.logs[sessionKey(s)]).length;
+}
+
+function showToast(msg,dur=2500){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+
+function getTypeBadgeClass(tipo){
+  if(tipo.includes('Fuerza')) return 'badge-fuerza';
+  if(tipo.includes('Z3')||tipo.includes('Específico')||tipo.includes('Z3 controlado')||tipo.includes('activación')) return 'badge-z3';
+  if(tipo.includes('Tirada')||tipo.includes('tirada')) return 'badge-larga';
+  if(tipo.includes('Recuperación')) return 'badge-rec';
+  if(tipo.includes('objetivo')) return 'badge-objetivo';
+  if(tipo.includes('Z2')&&!tipo.includes('Z3')) return 'badge-z2';
+  return 'badge-z2';
+}
+
+function getTypeLabel(tipo){
+  if(tipo==='Recuperación') return '😌 Descanso';
+  if(tipo.includes('Fuerza')) return '💪 Fuerza';
+  if(tipo.includes('Tirada')||tipo.includes('tirada')) return '🏔 Tirada';
+  if(tipo.includes('Z3')||tipo.includes('Específico')) return '🔥 Z3';
+  if(tipo.includes('objetivo')) return '🏁 Carrera';
+  return '🏃 Carrera';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+function showView(name, btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('#bottomnav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+  window.scrollTo(0,0);
+  if(name==='config'){ renderConfigSync(); updateStartDateInfo(); renderNutricion(); }
+  if(name==='log') renderLog();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════════
+function renderDashboard(){
+  const activePlan=getActivePlan();
+  const curWeek=getCurrentWeek();
+  const sessions=getWeekSessions(curWeek);
+  const fase=sessions[0]?.fase||'Fase 1';
+  const phaseNum=fase.split(' ')[1];
+  const pct=Math.round((curWeek/19)*100);
+
+  // Days to race = start + 19 weeks
+  const raceDate=new Date(getStartDate());
+  raceDate.setDate(raceDate.getDate()+19*7-1);
+  const daysLeft=Math.ceil((raceDate-new Date())/(24*60*60*1000));
+  document.getElementById('daysLeft').textContent=daysLeft>0?`${daysLeft} días 🏁`:'¡CARRERA!';
+
+  document.getElementById('heroPhaseBadge').textContent=fase+' · '+['Reconstrucción','Base Aeróbica','Específico Ultra','Taper'][parseInt(phaseNum)-1];
+  document.getElementById('heroTitle').textContent=`Semana ${curWeek} de 19`;
+  document.getElementById('heroSub').textContent=['','Z1–Z2 · Reconstrucción','Z2 + Z3 Controlado','Específico Ultra · Nutrición','Taper · Puesta a punto'][parseInt(phaseNum)];
+  document.getElementById('heroProgress').style.width=pct+'%';
+  document.getElementById('heroPercent').textContent=pct+'%';
+
+  document.getElementById('kpiWeek').textContent=`S${String(curWeek).padStart(2,'0')}`;
+  document.getElementById('kpiPhase').textContent=fase+' · '+['Reconstrucción','Base Aeróbica','Específico Ultra','Taper'][parseInt(phaseNum)-1];
+  document.getElementById('kpiLong').textContent=getLongRun(curWeek)||'—';
+  const load=calcWeekLoad(curWeek);
+  document.getElementById('kpiLoad').textContent=load>0?Math.round(load):'—';
+  document.getElementById('kpiSessions').textContent=getCompletedCount(curWeek)+'/'+sessions.length;
+
+  const todayStr=today();
+  const todaySessions=activePlan.filter(s=>s.fecha===todayStr);
+  const cont=document.getElementById('todayContainer');
+  if(todaySessions.length===0){
+    const next=activePlan.find(s=>s.fecha>todayStr&&s.tipo!=='Recuperación');
+    cont.innerHTML=`<div class="today-card"><div class="tc-top"><span class="tc-badge badge-rec">Hoy · Sin sesión</span></div><h3>Día de descanso 😌</h3><p class="tc-detail">Movilidad y recuperación activa.</p>${next?`<div class="note-bubble">Próxima sesión activa: <strong>${next.dia} ${next.fecha.slice(5)}</strong> — ${next.tipo}</div>`:''}</div>`;
+  } else {
+    cont.innerHTML=todaySessions.map(s=>{
+      const key=sessionKey(s);
+      const done=!!state.logs[key];
+      const idx=activePlan.indexOf(s);
+      return `<div class="today-card ${done?'done':''}" onclick="openSession(${idx})">
+        <div class="tc-top">
+          <span class="tc-badge ${getTypeBadgeClass(s.tipo)}">${getTypeLabel(s.tipo)}</span>
+          <span class="tc-day">${s.dia}</span>
+          ${s.duracion>0?`<span class="tc-dur">${s.duracion} min</span>`:''}
+        </div>
+        <h3>${s.tipo}</h3>
+        <p class="tc-detail">${s.objetivo}</p>
+        <div class="tc-fc">
+          ${s.zona_fc!=='-'?`<span class="fc-chip badge-z2">FC: ${s.fc_objetivo}</span>`:''}
+          ${s.terreno!=='-'?`<span class="fc-chip badge-rec">📍 ${s.terreno}</span>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  ['sleep','energy','stress','pain'].forEach((type)=>{
+    const cont=document.getElementById('dots-'+type);
+    if(!cont) return;
+    cont.innerHTML='';
+    const todayFatigue=state.fatigue[today()]||{};
+    for(let v=1;v<=5;v++){
+      const btn=document.createElement('div');
+      btn.className='sem-dot'+(todayFatigue[type]===v?` active-${type}`:'');
+      btn.textContent=v;
+      btn.onclick=()=>setFatigue(type,v);
+      cont.appendChild(btn);
+    }
+  });
+  updateSemaphore();
+}
+
+function setFatigue(type,val){
+  if(!state.fatigue[today()]) state.fatigue[today()]={};
+  state.fatigue[today()][type]=val;
+  saveState();
+  renderDashboard();
+}
+
+function updateSemaphore(){
+  const f=state.fatigue[today()]||{};
+  const {sleep=0,energy=0,stress=0,pain=0}=f;
+  if(!sleep&&!energy&&!stress&&!pain){
+    document.getElementById('semStatus').textContent='— Completa para ver semáforo';
+    for(let i=1;i<=5;i++) document.getElementById('sl'+i).className='sem-light';
+    return;
+  }
+  const idx=((5-sleep)+(5-energy)+stress+pain)/4;
+  document.querySelectorAll('.sem-light').forEach(l=>l.className='sem-light');
+  const st=document.getElementById('semStatus');
+  if(idx<=1.5){
+    st.innerHTML='🟢 Fatiga baja · Continuar plan normal';st.style.color='var(--green)';
+    for(let i=1;i<=2;i++) document.getElementById('sl'+i).classList.add('on-green');
+  } else if(idx<=2.5){
+    st.innerHTML='🟡 Fatiga moderada · Revisar sueño y nutrición';st.style.color='var(--gold)';
+    for(let i=1;i<=3;i++) document.getElementById('sl'+i).classList.add('on-yellow');
+  } else {
+    st.innerHTML='🔴 Fatiga alta · Considera repetir semana anterior';st.style.color='var(--red)';
+    for(let i=1;i<=5;i++) document.getElementById('sl'+i).classList.add('on-red');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PLAN
+// ═══════════════════════════════════════════════════════════════
+let planFilter='all';
+let expandedCards=new Set();
+
+function renderPlan(){
+  const activePlan=getActivePlan();
+  const container=document.getElementById('planContainer');
+  const data=planFilter==='all'?activePlan:activePlan.filter(s=>s.fase===planFilter);
+  const weeks={};
+  data.forEach(s=>{
+    if(!weeks[s.semana]) weeks[s.semana]={fase:s.fase,sessions:[]};
+    weeks[s.semana].sessions.push(s);
+  });
+  const curWeek=getCurrentWeek();
+  container.innerHTML=Object.keys(weeks).sort((a,b)=>a-b).map(wk=>{
+    const {fase,sessions}=weeks[wk];
+    const phNum=parseInt(fase.split(' ')[1]);
+    const completed=sessions.filter(s=>state.logs[sessionKey(s)]).length;
+    const longRun=sessions.filter(s=>s.tipo.toLowerCase().includes('tirada')).map(s=>s.duracion).reduce((a,b)=>Math.max(a,b),0);
+    const isOpen=expandedCards.has('week-'+wk)||parseInt(wk)===curWeek;
+    return `<div class="week-group">
+      <div class="week-header" onclick="toggleWeek(${wk})">
+        <span class="week-number" style="${parseInt(wk)===curWeek?'background:#2d6b52':''}">S${String(wk).padStart(2,'0')}</span>
+        <span class="week-phase-tag phase-tag-f${phNum}">${fase}</span>
+        <span class="week-stats">${completed}/${sessions.length} ✓ ${longRun?`· ${longRun}m`:''}</span>
+        <span class="week-arrow ${isOpen?'open':''}">›</span>
+      </div>
+      <div id="week-body-${wk}" style="${isOpen?'':'display:none'}">
+        ${sessions.map(s=>{
+          const key=sessionKey(s);
+          const done=!!state.logs[key];
+          const isExp=expandedCards.has(key);
+          const rpe=state.rpe[key]||'';
+          const dur=state.durReal[key]||'';
+          const sidx=activePlan.indexOf(s);
+          return `<div class="session-card ${done?'completed':''} ${isExp?'expanded':''}" id="card-${key.replace(/[^a-z0-9]/gi,'_')}">
+            <div class="sc-top" onclick="toggleCard('${key}')">
+              <span class="sc-day">${s.dia}</span>
+              <span class="sc-type">${s.tipo}</span>
+              ${s.duracion>0?`<span class="sc-dur">${s.duracion}m</span>`:''}
+              <span class="sc-badge ${getTypeBadgeClass(s.tipo)}">${getTypeLabel(s.tipo)}</span>
+              <div class="sc-check" onclick="event.stopPropagation();toggleDone('${key}')">${done?'✓':''}</div>
+            </div>
+            <div class="sc-detail">
+              <div class="sc-meta">
+                ${s.zona_fc!=='-'?`<span class="sc-meta-item">💓 ${s.fc_objetivo}</span>`:''}
+                ${s.terreno!=='-'?`<span class="sc-meta-item">📍 ${s.terreno}</span>`:''}
+                <span class="sc-meta-item">🎯 RPE ${s.rpe}</span>
+              </div>
+              <p style="margin-top:8px;font-size:12px;color:var(--ink3);line-height:1.6">${s.detalle}</p>
+              <p style="margin-top:6px;font-size:11px;color:var(--rec);font-style:italic">💡 ${s.sensaciones}</p>
+              <div class="sc-rpe-row">
+                <label>RPE real</label>
+                <div class="rpe-btns">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<button class="rpe-btn ${rpe==n?'selected':''}" onclick="event.stopPropagation();setRpe('${key}',${n})">${n}</button>`).join('')}</div>
+              </div>
+              <div class="dur-input-row">
+                <label>Dur. real</label>
+                <input class="dur-input" type="number" value="${dur}" placeholder="${s.duracion}" min="0" max="400" onchange="event.stopPropagation();setDur('${key}',this.value)" onclick="event.stopPropagation()">
+                <button class="save-btn" onclick="event.stopPropagation();quickSave('${key}')">💾 Guardar</button>
+              </div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleWeek(wk){
+  const key='week-'+wk;
+  const body=document.getElementById('week-body-'+wk);
+  const arrow=body.parentNode.querySelector('.week-arrow');
+  if(expandedCards.has(key)){expandedCards.delete(key);body.style.display='none';arrow.classList.remove('open');}
+  else{expandedCards.add(key);body.style.display='block';arrow.classList.add('open');}
+}
+
+function toggleCard(key){
+  const safeKey=key.replace(/[^a-z0-9]/gi,'_');
+  const card=document.getElementById('card-'+safeKey);
+  if(!card) return;
+  if(expandedCards.has(key)){expandedCards.delete(key);card.classList.remove('expanded');}
+  else{expandedCards.add(key);card.classList.add('expanded');}
+}
+
+function toggleDone(key){
+  if(state.logs[key]) delete state.logs[key];
+  else state.logs[key]={ts:Date.now()};
+  saveState();
+  renderPlan();
+  renderDashboard();
+  showToast(state.logs[key]?'✓ Sesión completada':'Sesión desmarcada');
+}
+
+function setRpe(key,val){
+  state.rpe[key]=val;
+  saveState();
+  renderPlan();
+}
+
+function setDur(key,val){
+  state.durReal[key]=parseFloat(val)||0;
+  saveState();
+}
+
+function quickSave(key){
+  if(!state.logs[key]) state.logs[key]={ts:Date.now()};
+  saveState();
+  renderPlan();
+  renderDashboard();
+  showToast('💾 Guardado y sincronizado');
+}
+
+document.getElementById('filterBar').addEventListener('click',e=>{
+  const btn=e.target.closest('.filter-btn');
+  if(!btn) return;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  planFilter=btn.dataset.filter;
+  expandedCards.clear();
+  renderPlan();
+});
+
+// ═══════════════════════════════════════════════════════════════
+// FUERZA
+// ═══════════════════════════════════════════════════════════════
+function renderFuerza(){
+  const c=document.getElementById('fuerzaContainer');
+  const phaseColors=['sp-f1','sp-f2','sp-f3','sp-f4'];
+  const phaseDesc=['4 semanas · 25 min · Adaptativa','6 semanas · 35 min · Base + excéntricos','6 semanas · 30 min · Mantenimiento específico','3 semanas · 20 min · Activación mínima'];
+  c.innerHTML=FUERZA_DATA.map((ph,i)=>{
+    const isOpen=i===0;
+    return `<div class="strength-phase">
+      <div class="sp-header ${phaseColors[i]}" onclick="toggleFuerzaPhase(${i})">
+        <div><h3>${ph.fase}</h3><div class="sp-info">${phaseDesc[i]}</div></div>
+        <span style="color:#fff;font-size:20px" id="fuerza-arrow-${i}">${isOpen?'▲':'▼'}</span>
+      </div>
+      <div class="sp-body ${isOpen?'open':''}" id="fuerza-body-${i}">
+        ${ph.ejercicios.map(ex=>`<div class="exercise-card">
+          <div class="ex-icon" style="background:#dde8c8">${ex.icono}</div>
+          <div class="ex-body">
+            <div class="ex-name">${ex.nombre}</div>
+            <div class="ex-series">${ex.series}</div>
+            <div class="ex-note">${ex.nota}</div>
+            <div class="ex-prog">→ ${ex.prog}</div>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleFuerzaPhase(i){
+  const body=document.getElementById('fuerza-body-'+i);
+  const arrow=document.getElementById('fuerza-arrow-'+i);
+  const open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  arrow.textContent=open?'▼':'▲';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LOG / SEGUIMIENTO
+// ═══════════════════════════════════════════════════════════════
+function renderLog(){
+  const week=state.logWeek||getCurrentWeek();
+  document.getElementById('logWeekLabel').textContent=`S${String(week).padStart(2,'0')}`;
+  const sessions=getWeekSessions(week);
+  const maxLoad=600;
+  const chartHtml=sessions.filter(s=>s.duracion>0).map(s=>{
+    const key=sessionKey(s);
+    const rpe=parseFloat(state.rpe[key])||0;
+    const dur=parseFloat(state.durReal[key])||0;
+    const load=rpe*dur;
+    const pct=Math.min((load/maxLoad)*100,100);
+    const done=!!state.logs[key];
+    return `<div class="load-bar-row">
+      <div class="load-bar-label">${s.dia.slice(0,3)}</div>
+      <div class="load-bar-track">
+        <div class="load-bar-fill" style="width:${pct}%;background:${done?'#2d9a6a':'#d4ede6'}">
+          ${load>0?`<span>${Math.round(load)}</span>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('loadChart').innerHTML=chartHtml||'<p style="font-size:12px;color:var(--rec);text-align:center;padding:10px">Completa sesiones para ver la carga</p>';
+
+  const totalLoad=calcWeekLoad(week);
+  const longRun=getLongRun(week);
+  const completed=getCompletedCount(week);
+  document.getElementById('wsStats').innerHTML=`
+    <div class="ws-stat"><div class="wsv">${totalLoad>0?Math.round(totalLoad):'—'}</div><div class="wsl">Carga total</div></div>
+    <div class="ws-stat"><div class="wsv">${longRun||'—'}</div><div class="wsl">Tirada (min)</div></div>
+    <div class="ws-stat"><div class="wsv">${completed}/${sessions.length}</div><div class="wsl">Completadas</div></div>`;
+
+  const sel=document.getElementById('logSessionSelect');
+  const activePlan=getActivePlan();
+  sel.innerHTML='<option value="">— Elegir sesión —</option>'+
+    activePlan.filter(s=>s.duracion>0).map((s,i)=>`<option value="${i}">[S${String(s.semana).padStart(2,'0')}] ${s.dia} · ${s.tipo} (${s.duracion}m)</option>`).join('');
+
+  const rpeCont=document.getElementById('logRpeBtns');
+  rpeCont.innerHTML=[1,2,3,4,5,6,7,8,9,10].map(n=>`<button class="rpe-btn" onclick="selectLogRpe(${n},this)">${n}</button>`).join('');
+}
+
+let selectedLogRpe=null;
+function selectLogRpe(val,btn){
+  selectedLogRpe=val;
+  document.querySelectorAll('#logRpeBtns .rpe-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function changeLogWeek(dir){
+  state.logWeek=Math.max(1,Math.min(19,(state.logWeek||getCurrentWeek())+dir));
+  saveState();
+  renderLog();
+}
+
+function saveLog(){
+  const idx=document.getElementById('logSessionSelect').value;
+  if(!idx){showToast('⚠️ Selecciona una sesión');return;}
+  const activePlan=getActivePlan();
+  const s=activePlan[parseInt(idx)];
+  const key=sessionKey(s);
+  const dur=parseFloat(document.getElementById('logDuracion').value)||0;
+  const notas=document.getElementById('logNotas').value;
+  if(!selectedLogRpe){showToast('⚠️ Indica el RPE');return;}
+  state.logs[key]={ts:Date.now()};
+  state.rpe[key]=selectedLogRpe;
+  if(dur>0) state.durReal[key]=dur;
+  if(notas) state.logs[key].notas=notas;
+  saveState();
+  document.getElementById('logDuracion').value='';
+  document.getElementById('logNotas').value='';
+  document.getElementById('logSessionSelect').value='';
+  selectedLogRpe=null;
+  document.querySelectorAll('#logRpeBtns .rpe-btn').forEach(b=>b.classList.remove('selected'));
+  state.logWeek=s.semana;
+  renderLog();
+  renderDashboard();
+  showToast('✅ Sesión registrada · Sincronizando...');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NUTRICIÓN
+// ═══════════════════════════════════════════════════════════════
+function renderNutricion(){
+  const c=document.getElementById('nutricionContainerConfig');
+  if(!c) return;
+  c.innerHTML=NUTRICION_DATA.map(n=>`<div class="nut-block ${n.alertaClass==='bad'?'alert':n.alertaClass==='warn'?'warn':''}">
+    <h4>${n.bloque}</h4>
+    <div class="nut-km">📍 ${n.km}</div>
+    <div class="nut-grid">
+      <div class="nut-item"><div class="nv">${n.cho}</div><div class="nl">CHO g/h</div></div>
+      <div class="nut-item"><div class="nv">${n.sodio}</div><div class="nl">Na mg/h</div></div>
+      <div class="nut-item"><div class="nv">${n.hidra}</div><div class="nl">ml/h</div></div>
+    </div>
+    <div class="nut-source">🍌 ${n.fuente}</div>
+    <div class="nut-source">⏱ ${n.senal}</div>
+    <div class="nut-alert ${n.alertaClass}">⚡ ${n.alerta}</div>
+  </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════════════
+function openSession(idx){
+  const activePlan=getActivePlan();
+  const s=activePlan[idx];
+  if(!s) return;
+  const key=sessionKey(s);
+  document.getElementById('modalTitle').textContent=s.tipo;
+  document.getElementById('modalSub').textContent=`${s.fase} · Semana ${s.semana} · ${s.dia} ${s.fecha}`;
+  document.getElementById('modalBody').innerHTML=`
+    <div class="info-row"><div class="info-label">Duración</div><div class="info-value">${s.duracion>0?s.duracion+' min':'Descanso'}</div></div>
+    ${s.zona_fc!=='-'?`<div class="info-row"><div class="info-label">Zona FC</div><div class="info-value">${s.zona_fc}</div></div>`:''}
+    ${s.fc_objetivo!=='-'?`<div class="info-row"><div class="info-label">FC objetivo</div><div class="info-value">${s.fc_objetivo}</div></div>`:''}
+    ${s.terreno!=='-'?`<div class="info-row"><div class="info-label">Terreno</div><div class="info-value">${s.terreno}</div></div>`:''}
+    <div class="info-row"><div class="info-label">Detalle</div><div class="info-value">${s.detalle}</div></div>
+    <div class="info-row"><div class="info-label">Objetivo</div><div class="info-value">${s.objetivo}</div></div>
+    <div class="info-row"><div class="info-label">Sensaciones</div><div class="info-value" style="font-style:italic;color:var(--rec)">${s.sensaciones}</div></div>
+    <div class="info-row"><div class="info-label">RPE plan</div><div class="info-value">${s.rpe}/10</div></div>
+    <hr style="margin:12px 0;border:none;border-top:1px solid var(--paper2)">
+    <button class="btn-primary" onclick="toggleDone('${key}');closeModal(null,true)">${state.logs[key]?'✗ Desmarcar sesión':'✓ Marcar como completada'}</button>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e,force){
+  if(force||e?.target===document.getElementById('modalOverlay')){
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER ALL
+// ═══════════════════════════════════════════════════════════════
+function renderAll(){
+  renderDashboard();
+  renderPlan();
+  renderFuerza();
+  renderLog();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+async function init(){
+  loadLocalState();
+  if(!state.logWeek) state.logWeek=getCurrentWeek();
+  expandedCards.add('week-'+getCurrentWeek());
+  renderAll();
+  renderConfigSync();
+  updateStartDateInfo();
+  // Auto-pull from cloud on load
+  if(cloudProfileKey){
+    setSyncStatus('syncing','Sincronizando...');
+    const ok = await pullFromCloud(cloudProfileKey);
+    if(ok){ renderAll(); }
+    setSyncStatus('connected','✓ Sincronizado');
+  }
+}
+
+init();
+</script>
+</body>
+</html>
