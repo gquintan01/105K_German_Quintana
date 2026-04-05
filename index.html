@@ -749,51 +749,7 @@ main{padding:16px;padding-bottom:80px;max-width:700px;margin:0 auto}
 
 <div class="toast" id="toast"></div>
 
-
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBXLFu17P1qUzKe8nM5SQysZ1EhXbX1q08",
-  authDomain: "k-accc6.firebaseapp.com",
-  projectId: "k-accc6",
-  storageBucket: "k-accc6.firebasestorage.app",
-  messagingSenderId: "406582071543",
-  appId: "1:406582071543:web:1aa381dfe02170e05443f2"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-window.storage = {
-  async set(key, value) {
-    try {
-      const normalized = typeof value === 'string' ? value : JSON.stringify(value);
-      await db.collection("ultra105k_profiles").doc(key).set({
-        value: normalized,
-        updatedAt: Date.now()
-      });
-      return true;
-    } catch (e) {
-      console.error("Error guardando en Firebase:", e);
-      return false;
-    }
-  },
-
-  async get(key) {
-    try {
-      const snap = await db.collection("ultra105k_profiles").doc(key).get();
-      if (!snap.exists) return null;
-      return snap.data();
-    } catch (e) {
-      console.error("Error leyendo de Firebase:", e);
-      return null;
-    }
-  }
-};
-</script>
-<script>
-
 // ═══════════════════════════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════════════════════════
@@ -878,22 +834,14 @@ function saveLocalState(){
 
 async function pushToCloud(){
   if(!cloudProfileKey || isSyncing) return;
-  if(!window.storage || typeof window.storage.set !== 'function'){
-    console.error('window.storage no está disponible');
-    setSyncStatus('error','Sin conexión');
-    return;
-  }
   isSyncing = true;
   setSyncStatus('syncing','Guardando en la nube...');
   try {
-    const payload = JSON.stringify({ ...state, _ts: Date.now() });
-    const result = await window.storage.set(cloudProfileKey, payload);
+    const payload = JSON.stringify({...state, _ts: Date.now()});
+    const result = await window.storage.set(cloudProfileKey, payload, true);
     if(result) setSyncStatus('connected','✓ Guardado · '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}));
     else setSyncStatus('error','Error al guardar');
-  } catch(e){
-    console.error('pushToCloud error:', e);
-    setSyncStatus('error','Sin conexión');
-  }
+  } catch(e){ setSyncStatus('error','Sin conexión'); }
   isSyncing = false;
   if(pendingSync){ pendingSync=false; pushToCloud(); }
 }
@@ -901,38 +849,32 @@ async function pushToCloud(){
 async function pullFromCloud(profileKey){
   setSyncStatus('syncing','Cargando datos...');
   try {
-    if(!window.storage || typeof window.storage.get !== 'function'){
-      console.error('window.storage no está disponible');
-      return false;
-    }
-    const result = await window.storage.get(profileKey);
+    const result = await window.storage.get(profileKey, true);
     if(result && result.value){
-      const remote = typeof result.value === 'string' ? JSON.parse(result.value) : result.value;
+      const remote = JSON.parse(result.value);
       const localTs = state._ts || 0;
       const remoteTs = remote._ts || 1;
       if(remoteTs >= localTs || !state._ts){
-        const { _ts, ...cleanRemote } = remote;
-        state = { ...state, ...cleanRemote };
-        if(!state.logs) state.logs = {};
-        if(!state.fatigue) state.fatigue = {};
-        if(!state.rpe) state.rpe = {};
-        if(!state.durReal) state.durReal = {};
-        if(!state.sessionDateOverrides) state.sessionDateOverrides = {};
-        if(!state.logWeek) state.logWeek = 1;
-        if(!state.startDate) state.startDate = ORIGINAL_START_STR;
+        const {_ts,...cleanRemote} = remote;
+        state = {...state, ...cleanRemote};
+        if(!state.logs) state.logs={};
+        if(!state.fatigue) state.fatigue={};
+        if(!state.rpe) state.rpe={};
+        if(!state.durReal) state.durReal={};
+        if(!state.sessionDateOverrides) state.sessionDateOverrides={};
+        if(!state.logWeek) state.logWeek=1;
+        if(!state.sessionDateOverrides) state.sessionDateOverrides={};
+        if(!state.startDate) state.startDate=ORIGINAL_START_STR;
         saveLocalState();
         return true;
       }
     }
-  } catch(e){
-    console.error('pullFromCloud error:', e);
-  }
+  } catch(e){}
   return false;
 }
 
 let saveTimer = null;
 function saveState(){
-  state._ts = Date.now();
   saveLocalState();
   clearTimeout(saveTimer);
   if(cloudProfileKey){
@@ -1084,6 +1026,7 @@ function applyTrainingDateChange(){
   state.sessionDateOverrides[select.value] = input.value;
   saveState();
   renderAll();
+  renderPlan();
   renderConfigSync();
   showToast('🗓️ Fecha del entrenamiento actualizada');
 }
@@ -1095,6 +1038,7 @@ function resetTrainingDateChange(){
   delete state.sessionDateOverrides[select.value];
   saveState();
   renderAll();
+  renderPlan();
   renderConfigSync();
   showToast('↩️ Cambio de fecha eliminado');
 }
@@ -1135,7 +1079,8 @@ function updateStartDateInfo(){
   const endDate=new Date(sd);
   endDate.setDate(endDate.getDate()+19*7-1);
   const curWeek=getCurrentWeek();
-  const fmt=d=>formatDateEsShort(d.toISOString().slice(0,10));
+  const fmtOpts={day:'2-digit',month:'short',year:'numeric'};
+  const fmt=d=>d.toLocaleDateString('es',fmtOpts);
   info.innerHTML=`
     <div class="config-info-row"><span class="config-info-key">Inicio semana 1</span><span class="config-info-val">${fmt(sd)}</span></div>
     <div class="config-info-row"><span class="config-info-key">Fin semana 19</span><span class="config-info-val">${fmt(endDate)}</span></div>
@@ -1365,6 +1310,9 @@ function renderPlan(){
     if(!weeks[s.semana]) weeks[s.semana]={fase:s.fase,sessions:[]};
     weeks[s.semana].sessions.push(s);
   });
+  Object.keys(weeks).forEach(wk=>{
+    weeks[wk].sessions.sort((a,b)=>a.fecha.localeCompare(b.fecha) || a.tipo.localeCompare(b.tipo));
+  });
   const curWeek=getCurrentWeek();
   container.innerHTML=Object.keys(weeks).sort((a,b)=>a-b).map(wk=>{
     const {fase,sessions}=weeks[wk];
@@ -1395,6 +1343,9 @@ function renderPlan(){
               <span class="sc-badge ${getTypeBadgeClass(s.tipo)}">${getTypeLabel(s.tipo)}</span>
               <div class="sc-check" onclick="event.stopPropagation();toggleDone('${key}')">${done?'✓':''}</div>
             </div>
+            <div class="sc-meta" style="margin-top:0;margin-bottom:6px">
+              <span class="sc-date">📅 ${formatDateEsShort(s.fecha)}</span>
+            </div>
             <div class="sc-detail">
               <div class="sc-meta">
                 ${s.zona_fc!=='-'?`<span class="sc-meta-item">💓 ${s.fc_objetivo}</span>`:''}
@@ -1409,7 +1360,7 @@ function renderPlan(){
               </div>
               <div class="dur-input-row">
                 <label>Dur. real</label>
-                <input class="dur-input" type="number" value="${dur}" placeholder="${s.duracion}" min="0" max="400" oninput="event.stopPropagation();setDur('${key}',this.value)" onblur="event.stopPropagation();setDur('${key}',this.value)" onclick="event.stopPropagation()">
+                <input class="dur-input" type="number" value="${dur}" placeholder="${s.duracion}" min="0" max="400" onchange="event.stopPropagation();setDur('${key}',this.value)" onclick="event.stopPropagation()">
                 <button class="save-btn" onclick="event.stopPropagation();quickSave('${key}')">💾 Guardar</button>
               </div>
             </div>
@@ -1456,10 +1407,9 @@ function setDur(key,val){
   saveState();
 }
 
-async function quickSave(key){
+function quickSave(key){
   if(!state.logs[key]) state.logs[key]={ts:Date.now()};
   saveState();
-  if(cloudProfileKey) await pushToCloud();
   renderPlan();
   renderDashboard();
   showToast('💾 Guardado y sincronizado');
@@ -1667,12 +1617,8 @@ async function init(){
   if(cloudProfileKey){
     setSyncStatus('syncing','Sincronizando...');
     const ok = await pullFromCloud(cloudProfileKey);
-    if(ok){
-      renderAll();
-      setSyncStatus('connected','✓ Sincronizado');
-    } else {
-      setSyncStatus('offline','Sin perfil en la nube');
-    }
+    if(ok){ renderAll(); }
+    setSyncStatus('connected','✓ Sincronizado');
   }
 }
 
