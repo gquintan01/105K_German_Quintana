@@ -216,12 +216,6 @@ main{padding:16px;padding-bottom:80px;max-width:700px;margin:0 auto}
 .session-card.expanded .sc-detail{display:block}
 .session-card .sc-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
 .session-card .sc-meta-item{font-size:11px;color:var(--rec);display:flex;align-items:center;gap:3px}
-.session-card .sc-date{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:4px 8px;border-radius:999px;
-  background:var(--paper);border:1px solid var(--paper2);
-  color:var(--ink2);font-size:11px;font-weight:700;
-}
 .session-card .sc-check{
   width:28px;height:28px;border-radius:50%;border:2px solid var(--paper2);
   background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;
@@ -981,7 +975,7 @@ function renderTrainingDateControls(){
   const plan = getActivePlan().slice().sort((a,b)=> a.fecha.localeCompare(b.fecha) || a.semana-b.semana);
   select.innerHTML = '<option value="">Selecciona un entrenamiento</option>' + plan.map(s=>{
     const changed = (state.sessionDateOverrides||{})[s.sid] ? ' · ajustado' : '';
-    return `<option value="${s.sid}">S${s.semana} · ${formatDateEsShort(s.fecha)} · ${s.dia} · ${s.tipo}${changed}</option>`;
+    return `<option value="${s.sid}">S${s.semana} · ${s.fecha} · ${s.dia} · ${s.tipo}${changed}</option>`;
   }).join('');
 
   if(current && [...select.options].some(opt=>opt.value===current)) select.value = current;
@@ -1011,7 +1005,7 @@ function previewTrainingDateSelection(){
   info.innerHTML = `
     <div class="config-info-row"><span class="config-info-key">Entrenamiento</span><span class="config-info-val">${session.tipo}</span></div>
     <div class="config-info-row"><span class="config-info-key">Semana</span><span class="config-info-val">S${session.semana}</span></div>
-    <div class="config-info-row"><span class="config-info-key">Fecha actual</span><span class="config-info-val">${formatDateEsShort(session.fecha)} · ${session.dia}</span></div>
+    <div class="config-info-row"><span class="config-info-key">Fecha actual</span><span class="config-info-val">${session.fecha} · ${session.dia}</span></div>
     <div class="config-info-row"><span class="config-info-key">Estado</span><span class="config-info-val">${overridden ? 'Fecha modificada' : 'Fecha original / automática'}</span></div>
   `;
 }
@@ -1094,13 +1088,6 @@ function getDayNameEs(dateIso){
   const [y,m,d] = dateIso.split('-').map(Number);
   const dayNames=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   return dayNames[new Date(y, m-1, d).getDay()];
-}
-
-function formatDateEsShort(dateIso){
-  if(!dateIso) return '';
-  const [y,m,d] = dateIso.split('-').map(Number);
-  const meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-  return `${String(d).padStart(2,'0')}-${meses[m-1]}-${y}`;
 }
 
 function getActivePlan(){
@@ -1564,7 +1551,7 @@ function openSession(idx){
   if(!s) return;
   const key=sessionKey(s);
   document.getElementById('modalTitle').textContent=s.tipo;
-  document.getElementById('modalSub').textContent=`${s.fase} · Semana ${s.semana} · ${s.dia} · ${formatDateEsShort(s.fecha)}`;
+  document.getElementById('modalSub').textContent=`${s.fase} · Semana ${s.semana} · ${s.dia} ${s.fecha}`;
   document.getElementById('modalBody').innerHTML=`
     <div class="info-row"><div class="info-label">Duración</div><div class="info-value">${s.duracion>0?s.duracion+' min':'Descanso'}</div></div>
     ${s.zona_fc!=='-'?`<div class="info-row"><div class="info-label">Zona FC</div><div class="info-value">${s.zona_fc}</div></div>`:''}
