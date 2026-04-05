@@ -216,6 +216,12 @@ main{padding:16px;padding-bottom:80px;max-width:700px;margin:0 auto}
 .session-card.expanded .sc-detail{display:block}
 .session-card .sc-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
 .session-card .sc-meta-item{font-size:11px;color:var(--rec);display:flex;align-items:center;gap:3px}
+.session-card .sc-date{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 8px;border-radius:999px;
+  background:var(--paper);border:1px solid var(--paper2);
+  color:var(--ink2);font-size:11px;font-weight:700;
+}
 .session-card .sc-check{
   width:28px;height:28px;border-radius:50%;border:2px solid var(--paper2);
   background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;
@@ -449,6 +455,9 @@ main{padding:16px;padding-bottom:80px;max-width:700px;margin:0 auto}
 .config-info-key{color:var(--rec);font-weight:600}
 .config-info-val{color:var(--ink);font-weight:700;font-family:var(--font-display);font-size:14px}
 .config-warn{background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:12px;color:#795548;line-height:1.5}
+.config-helper{font-size:12px;color:var(--rec);line-height:1.5;margin-top:6px}
+.config-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.btn-secondary{width:100%;padding:14px;border:2px solid var(--paper2);border-radius:10px;background:#fff;color:var(--ink);font-family:var(--font-display);font-size:16px;font-weight:700;cursor:pointer}
 
 /* ─── MISC ────────────────────────────────────────────────── */
 .empty-state{text-align:center;padding:40px 20px;color:var(--rec)}
@@ -472,7 +481,7 @@ main{padding:16px;padding-bottom:80px;max-width:700px;margin:0 auto}
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <div class="logo">105K<span> GERMAN QUINTANA</span></div>
+  <div class="logo">RETO DEL INDIO<span> 105k  GERMAN QUINTANA </span></div>
   <div class="race-badge" id="daysLeft">— días</div>
 </div>
 
@@ -666,6 +675,24 @@ main{padding:16px;padding-bottom:80px;max-width:700px;margin:0 auto}
       <button class="btn-primary" style="margin-top:14px" onclick="applyStartDate()">✅ Aplicar nueva fecha de inicio</button>
     </div>
 
+    <div class="section-title" style="margin-top:8px">🗓️ Cambiar fecha de un entrenamiento</div>
+    <div class="config-card">
+      <div class="config-section">
+        <label class="config-label">Selecciona el entrenamiento</label>
+        <select id="trainingDateSelect" class="config-date-input" onchange="previewTrainingDateSelection()"></select>
+        <div class="config-helper">Puedes mover una sesión puntual sin cambiar el resto del plan.</div>
+      </div>
+      <div class="config-info" id="trainingDateInfo"></div>
+      <div class="config-section">
+        <label class="config-label">Nueva fecha del entrenamiento</label>
+        <input type="date" id="trainingDateInput" class="config-date-input">
+      </div>
+      <div class="config-actions">
+        <button class="btn-primary" onclick="applyTrainingDateChange()">💾 Guardar nueva fecha</button>
+        <button class="btn-secondary" onclick="resetTrainingDateChange()">↩️ Quitar cambio</button>
+      </div>
+    </div>
+
     <!-- ZONAS FC -->
     <div class="section-title" style="margin-top:8px">💓 Zonas FC (CPET)</div>
     <div class="zone-card" style="background:var(--z1bg)">
@@ -722,37 +749,6 @@ main{padding:16px;padding-bottom:80px;max-width:700px;margin:0 auto}
 
 <div class="toast" id="toast"></div>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBXLFu17P1qUzKe8nM5SQysZ1EhXbX1q08",
-  authDomain: "k-accc6.firebaseapp.com",
-  projectId: "k-accc6",
-  storageBucket: "k-accc6.firebasestorage.app",
-  messagingSenderId: "406582071543",
-  appId: "1:406582071543:web:1aa381dfe02170e05443f2"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-window.storage = {
-  async set(key, value) {
-    await db.collection("ultra105k_profiles").doc(key).set({
-      value,
-      updatedAt: Date.now()
-    });
-    return true;
-  },
-
-  async get(key) {
-    const snap = await db.collection("ultra105k_profiles").doc(key).get();
-    if (!snap.exists) return null;
-    return snap.data();
-  }
-};
-</script>
 <script>
 // ═══════════════════════════════════════════════════════════════
 // DATA
@@ -824,13 +820,16 @@ function loadLocalState(){
   if(!state.fatigue) state.fatigue = {};
   if(!state.rpe) state.rpe = {};
   if(!state.durReal) state.durReal = {};
+  if(!state.sessionDateOverrides) state.sessionDateOverrides = {};
+  if(!state.sessionDateOverrides) state.sessionDateOverrides = {};
   if(!state.logWeek) state.logWeek = 1;
+  if(!state.sessionDateOverrides) state.sessionDateOverrides = {};
   if(!state.startDate) state.startDate = ORIGINAL_START_STR;
   cloudProfileKey = localStorage.getItem('ultra105k_cloudkey') || null;
 }
 
 function saveLocalState(){
-  try { localStorage.setItem('ultra105k_'+STORAGE_VERSION, JSON.stringify(state)); } catch(e){ console.error('pullFromCloud error:', e); }
+  try { localStorage.setItem('ultra105k_'+STORAGE_VERSION, JSON.stringify(state)); } catch(e){}
 }
 
 async function pushToCloud(){
@@ -842,10 +841,7 @@ async function pushToCloud(){
     const result = await window.storage.set(cloudProfileKey, payload, true);
     if(result) setSyncStatus('connected','✓ Guardado · '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}));
     else setSyncStatus('error','Error al guardar');
-  } catch(e){
-    console.error('pushToCloud error:', e);
-    setSyncStatus('error','Sin conexión');
-  }
+  } catch(e){ setSyncStatus('error','Sin conexión'); }
   isSyncing = false;
   if(pendingSync){ pendingSync=false; pushToCloud(); }
 }
@@ -859,25 +855,26 @@ async function pullFromCloud(profileKey){
       const localTs = state._ts || 0;
       const remoteTs = remote._ts || 1;
       if(remoteTs >= localTs || !state._ts){
-        const { _ts, ...cleanRemote } = remote;
-        state = { ...state, ...cleanRemote };
+        const {_ts,...cleanRemote} = remote;
+        state = {...state, ...cleanRemote};
         if(!state.logs) state.logs={};
         if(!state.fatigue) state.fatigue={};
         if(!state.rpe) state.rpe={};
         if(!state.durReal) state.durReal={};
+        if(!state.sessionDateOverrides) state.sessionDateOverrides={};
         if(!state.logWeek) state.logWeek=1;
+        if(!state.sessionDateOverrides) state.sessionDateOverrides={};
         if(!state.startDate) state.startDate=ORIGINAL_START_STR;
         saveLocalState();
         return true;
       }
     }
-  } catch(e){ console.error('pullFromCloud error:', e); }
+  } catch(e){}
   return false;
 }
 
 let saveTimer = null;
 function saveState(){
-  state._ts = Date.now();
   saveLocalState();
   clearTimeout(saveTimer);
   if(cloudProfileKey){
@@ -964,6 +961,7 @@ function renderConfigSync(){
     connected.style.display='none';
     setSyncStatus('offline','Sin perfil en la nube');
   }
+  renderTrainingDateControls();
 }
 
 function copyCode(){
@@ -971,6 +969,76 @@ function copyCode(){
   const code=cloudProfileKey.replace('u105k:','').toUpperCase();
   navigator.clipboard?.writeText(code).then(()=>showToast('📋 Código copiado: '+code))
     .catch(()=>showToast('Código: '+code));
+}
+
+function renderTrainingDateControls(){
+  const select = document.getElementById('trainingDateSelect');
+  const info = document.getElementById('trainingDateInfo');
+  const input = document.getElementById('trainingDateInput');
+  if(!select || !info || !input) return;
+
+  const current = select.value;
+  const plan = getActivePlan().slice().sort((a,b)=> a.fecha.localeCompare(b.fecha) || a.semana-b.semana);
+  select.innerHTML = '<option value="">Selecciona un entrenamiento</option>' + plan.map(s=>{
+    const changed = (state.sessionDateOverrides||{})[s.sid] ? ' · ajustado' : '';
+    return `<option value="${s.sid}">S${s.semana} · ${formatDateEsShort(s.fecha)} · ${s.dia} · ${s.tipo}${changed}</option>`;
+  }).join('');
+
+  if(current && [...select.options].some(opt=>opt.value===current)) select.value = current;
+  else if(!select.value && plan.length) select.value = plan[0].sid;
+
+  previewTrainingDateSelection();
+}
+
+function previewTrainingDateSelection(){
+  const select = document.getElementById('trainingDateSelect');
+  const info = document.getElementById('trainingDateInfo');
+  const input = document.getElementById('trainingDateInput');
+  if(!select || !info || !input) return;
+
+  const sid = select.value;
+  if(!sid){
+    info.innerHTML = '<div class="config-info-row"><span class="config-info-key">Estado</span><span class="config-info-val">Selecciona una sesión</span></div>';
+    input.value = '';
+    return;
+  }
+
+  const session = getActivePlan().find(s=>s.sid===sid);
+  if(!session) return;
+
+  input.value = session.fecha;
+  const overridden = !!((state.sessionDateOverrides||{})[sid]);
+  info.innerHTML = `
+    <div class="config-info-row"><span class="config-info-key">Entrenamiento</span><span class="config-info-val">${session.tipo}</span></div>
+    <div class="config-info-row"><span class="config-info-key">Semana</span><span class="config-info-val">S${session.semana}</span></div>
+    <div class="config-info-row"><span class="config-info-key">Fecha actual</span><span class="config-info-val">${formatDateEsShort(session.fecha)} · ${session.dia}</span></div>
+    <div class="config-info-row"><span class="config-info-key">Estado</span><span class="config-info-val">${overridden ? 'Fecha modificada' : 'Fecha original / automática'}</span></div>
+  `;
+}
+
+function applyTrainingDateChange(){
+  const select = document.getElementById('trainingDateSelect');
+  const input = document.getElementById('trainingDateInput');
+  if(!select || !select.value){ showToast('⚠️ Selecciona un entrenamiento'); return; }
+  if(!input || !input.value){ showToast('⚠️ Selecciona una fecha'); return; }
+
+  if(!state.sessionDateOverrides) state.sessionDateOverrides = {};
+  state.sessionDateOverrides[select.value] = input.value;
+  saveState();
+  renderAll();
+  renderConfigSync();
+  showToast('🗓️ Fecha del entrenamiento actualizada');
+}
+
+function resetTrainingDateChange(){
+  const select = document.getElementById('trainingDateSelect');
+  if(!select || !select.value){ showToast('⚠️ Selecciona un entrenamiento'); return; }
+  if(!state.sessionDateOverrides) state.sessionDateOverrides = {};
+  delete state.sessionDateOverrides[select.value];
+  saveState();
+  renderAll();
+  renderConfigSync();
+  showToast('↩️ Cambio de fecha eliminado');
 }
 
 // ── Start date ──────────────────────────────────────────────────
@@ -1020,17 +1088,32 @@ function updateStartDateInfo(){
 }
 
 // ── Dynamic plan dates ──────────────────────────────────────────
-const PLAN_DATA_BASE = PLAN_DATA.map(s=>({...s}));
+const PLAN_DATA_BASE = PLAN_DATA.map(s=>({ ...s, sid:`${s.semana}-${s.fecha}-${s.dia}` }));
+
+function getDayNameEs(dateIso){
+  const [y,m,d] = dateIso.split('-').map(Number);
+  const dayNames=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  return dayNames[new Date(y, m-1, d).getDay()];
+}
+
+function formatDateEsShort(dateIso){
+  if(!dateIso) return '';
+  const [y,m,d] = dateIso.split('-').map(Number);
+  const meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return `${String(d).padStart(2,'0')}-${meses[m-1]}-${y}`;
+}
 
 function getActivePlan(){
   const origStart=new Date(ORIGINAL_START_STR);
   const newStart=new Date(getStartDate());
   const diffDays=Math.round((newStart-origStart)/(24*60*60*1000));
-  if(diffDays===0) return PLAN_DATA_BASE;
+  const overrides = state.sessionDateOverrides || {};
   return PLAN_DATA_BASE.map(s=>{
     const d=new Date(s.fecha);
     d.setDate(d.getDate()+diffDays);
-    return {...s, fecha:d.toISOString().slice(0,10)};
+    const shiftedDate = d.toISOString().slice(0,10);
+    const finalDate = overrides[s.sid] || shiftedDate;
+    return { ...s, fecha: finalDate, dia: getDayNameEs(finalDate) };
   });
 }
 
@@ -1041,7 +1124,7 @@ function today(){
   const d=new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
-function sessionKey(s){ return `${s.semana}-${s.fecha}-${s.dia}`; }
+function sessionKey(s){ return s.sid || `${s.semana}-${s.fecha}-${s.dia}`; }
 
 function getCurrentWeek(){
   const t=new Date(today());
@@ -1269,7 +1352,7 @@ function renderPlan(){
               </div>
               <div class="dur-input-row">
                 <label>Dur. real</label>
-                <input class="dur-input" type="number" value="${dur}" placeholder="${s.duracion}" min="0" max="400" oninput="event.stopPropagation();setDur('${key}',this.value)" onblur="event.stopPropagation();setDur('${key}',this.value)" onclick="event.stopPropagation()">
+                <input class="dur-input" type="number" value="${dur}" placeholder="${s.duracion}" min="0" max="400" onchange="event.stopPropagation();setDur('${key}',this.value)" onclick="event.stopPropagation()">
                 <button class="save-btn" onclick="event.stopPropagation();quickSave('${key}')">💾 Guardar</button>
               </div>
             </div>
@@ -1316,12 +1399,9 @@ function setDur(key,val){
   saveState();
 }
 
-async function quickSave(key){
+function quickSave(key){
   if(!state.logs[key]) state.logs[key]={ts:Date.now()};
   saveState();
-  if(cloudProfileKey){
-    await pushToCloud();
-  }
   renderPlan();
   renderDashboard();
   showToast('💾 Guardado y sincronizado');
@@ -1484,7 +1564,7 @@ function openSession(idx){
   if(!s) return;
   const key=sessionKey(s);
   document.getElementById('modalTitle').textContent=s.tipo;
-  document.getElementById('modalSub').textContent=`${s.fase} · Semana ${s.semana} · ${s.dia} ${s.fecha}`;
+  document.getElementById('modalSub').textContent=`${s.fase} · Semana ${s.semana} · ${s.dia} · ${formatDateEsShort(s.fecha)}`;
   document.getElementById('modalBody').innerHTML=`
     <div class="info-row"><div class="info-label">Duración</div><div class="info-value">${s.duracion>0?s.duracion+' min':'Descanso'}</div></div>
     ${s.zona_fc!=='-'?`<div class="info-row"><div class="info-label">Zona FC</div><div class="info-value">${s.zona_fc}</div></div>`:''}
@@ -1533,6 +1613,32 @@ async function init(){
     setSyncStatus('connected','✓ Sincronizado');
   }
 }
+
+
+// Exponer funciones al ámbito global para que funcionen los onclick del HTML
+window.showView = showView;
+window.toggleWeek = toggleWeek;
+window.toggleCard = toggleCard;
+window.toggleDone = toggleDone;
+window.setRpe = setRpe;
+window.setDur = setDur;
+window.quickSave = quickSave;
+window.toggleFuerzaPhase = toggleFuerzaPhase;
+window.changeLogWeek = changeLogWeek;
+window.selectLogRpe = selectLogRpe;
+window.saveLog = saveLog;
+window.openSession = openSession;
+window.closeModal = closeModal;
+window.forcePush = forcePush;
+window.forcePull = forcePull;
+window.createNewProfile = createNewProfile;
+window.loadProfile = loadProfile;
+window.disconnectProfile = disconnectProfile;
+window.copyCode = copyCode;
+window.applyStartDate = applyStartDate;
+window.previewTrainingDateSelection = previewTrainingDateSelection;
+window.applyTrainingDateChange = applyTrainingDateChange;
+window.resetTrainingDateChange = resetTrainingDateChange;
 
 init();
 </script>
