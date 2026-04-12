@@ -1566,7 +1566,7 @@ function renderLog(){
   const sel=document.getElementById('logSessionSelect');
   const activePlan=getActivePlan();
   sel.innerHTML='<option value="">— Elegir sesión —</option>'+
-    activePlan.filter(s=>s.duracion>0).map((s,i)=>`<option value="${i}">[S${String(s.semana).padStart(2,'0')}] ${s.dia} · ${s.tipo} (${s.duracion}m)</option>`).join('');
+    activePlan.map((s,i)=>s.duracion>0?`<option value="${i}">[S${String(s.semana).padStart(2,'0')}] ${s.dia} · ${s.tipo} (${s.duracion}m)</option>`:'').join('');
 
   const rpeCont=document.getElementById('logRpeBtns');
   rpeCont.innerHTML=[1,2,3,4,5,6,7,8,9,10].map(n=>`<button class="rpe-btn" onclick="selectLogRpe(${n},this)">${n}</button>`).join('');
